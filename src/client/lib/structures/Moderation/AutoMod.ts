@@ -1,7 +1,8 @@
 import { Collection, Invite } from "discord.js";
 import type { Client } from "../../../client";
-import { INVITE_REGEX } from "./regex";
+import { INVITE_REGEX, ZALGO_REGEX } from "./regex";
 import type { AutoModDupCache, AutoModResults, GuildMessage, phishingLinksData } from "./types";
+import { clean } from "unzalgo";
 
 export class AutoMod {
 	public dupTextCache: AutoModDupCache = new Collection();
@@ -13,7 +14,15 @@ export class AutoMod {
 	public constructor(public client: Client) {}
 
 	public async run(message: GuildMessage) {
-		const results = await Promise.all([this.invite(message), this.dupText(message), this.phishingCheck(message)]);
+		const cleanMessage = message;
+		cleanMessage.content = this.unZalgo(message.content);
+
+		const results = await Promise.all([
+			this.invite(cleanMessage),
+			this.dupText(cleanMessage),
+			this.phishingCheck(cleanMessage),
+			this.zalgo(message)
+		]);
 		console.log(results);
 	}
 
@@ -86,5 +95,21 @@ export class AutoMod {
 			};
 
 		return null;
+	}
+
+	public zalgo(message: GuildMessage): AutoModResults | null {
+		if (ZALGO_REGEX.test(encodeURIComponent(message.content)))
+			return {
+				guild: message.guildId,
+				user: message.author.id,
+				date: Date.now(),
+				key: "AUTOMOD_ZALGO"
+			};
+
+		return null;
+	}
+
+	private unZalgo(str: string) {
+		return clean(str);
 	}
 }
