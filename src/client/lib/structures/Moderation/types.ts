@@ -26,3 +26,8 @@ export interface AutoModCacheDupData {
  * Key for the object is **userId-guildId**
  */
 export type AutoModDupCache = Collection<string, AutoModCacheDupData>;
+
+export interface phishingLinksData {
+	suspicious: string[];
+	guaranteed: string[];
+}

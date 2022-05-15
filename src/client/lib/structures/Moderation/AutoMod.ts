@@ -1,10 +1,14 @@
 import { Collection, Invite } from "discord.js";
 import type { Client } from "../../../client";
 import { INVITE_REGEX } from "./regex";
-import type { AutoModDupCache, AutoModResults, GuildMessage } from "./types";
+import type { AutoModDupCache, AutoModResults, GuildMessage, phishingLinksData } from "./types";
 
 export class AutoMod {
 	public dupTextCache: AutoModDupCache = new Collection();
+	public phishing: phishingLinksData = {
+		suspicious: [],
+		guaranteed: []
+	};
 
 	public constructor(public client: Client) {}
 
