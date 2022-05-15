@@ -1,6 +1,6 @@
 import {
 	AnyChannel,
-	AwaitMessageComponentOptions,
+	AwaitMessageCollectorOptionsParams,
 	AwaitMessagesOptions,
 	ButtonInteraction,
 	Channel,
@@ -13,7 +13,7 @@ import {
 	MessageActionRow,
 	MessageAttachment,
 	MessageButton,
-	MessageComponentInteraction,
+	MessageComponentTypeResolvable,
 	MessageEmbed,
 	MessageEmbedOptions,
 	PermissionResolvable,
@@ -182,10 +182,7 @@ export class Utils {
 		});
 	}
 
-	public async awaitComponent(
-		message: Message,
-		options: AwaitMessageComponentOptions<MessageComponentInteraction> = { time: 6e4 }
-	): Promise<MessageComponentInteraction | null> {
+	public async awaitComponent(message: Message, options: AwaitMessageCollectorOptionsParams<MessageComponentTypeResolvable> = { time: 6e4 }) {
 		options = { time: 6e4, ...options };
 		const coll = await message.awaitMessageComponent(options).catch(() => null);
 
