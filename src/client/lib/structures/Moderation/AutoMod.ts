@@ -12,6 +12,11 @@ export class AutoMod {
 
 	public constructor(public client: Client) {}
 
+	public async run(message: GuildMessage) {
+		const results = await Promise.all([this.invite(message), this.dupText(message), this.phishingCheck(message)]);
+		console.log(results);
+	}
+
 	public async invite(message: GuildMessage): Promise<AutoModResults | null> {
 		const invites = message.content.match(INVITE_REGEX) ?? [];
 
@@ -42,6 +47,14 @@ export class AutoMod {
 
 		const dupData = this.dupTextCache.get(dupId);
 		if (dupData) {
+			clearTimeout(dupData.timeout);
+			const timeout = setTimeout(() => this.dupTextCache.delete(dupId), 6e4);
+			this.dupTextCache.set(dupId, {
+				...dupData,
+				timeout,
+				lastMessage: newContent
+			});
+
 			if (dupData.lastMessage === newContent)
 				return {
 					guild: message.guildId,
@@ -49,13 +62,6 @@ export class AutoMod {
 					date: Date.now(),
 					key: "AUTOMOD_DUP_TEXT"
 				};
-
-			clearTimeout(dupData.timeout);
-			const timeout = setTimeout(() => this.dupTextCache.delete(dupId), 6e4);
-			this.dupTextCache.set(dupId, {
-				...dupData,
-				timeout
-			});
 		} else {
 			const timeout = setTimeout(() => this.dupTextCache.delete(dupId), 6e4);
 			this.dupTextCache.set(dupId, {
@@ -65,6 +71,19 @@ export class AutoMod {
 				timeout
 			});
 		}
+
+		return null;
+	}
+
+	public phishingCheck(message: GuildMessage): AutoModResults | null {
+		const content = message.content.toLowerCase();
+		if (this.phishing.guaranteed.some((str) => content.includes(str)) || this.phishing.suspicious.some((str) => content.includes(str)))
+			return {
+				guild: message.guildId,
+				user: message.author.id,
+				date: Date.now(),
+				key: "AUTOMOD_PHISHING"
+			};
 
 		return null;
 	}
