@@ -2,7 +2,7 @@ import { SapphireClient } from "@sapphire/framework";
 import type { ActivitiesOptions, BitFieldResolvable, IntentsString, PartialTypes, PresenceStatusData } from "discord.js";
 import { join } from "path";
 import { PrismaClient } from "@prisma/client";
-import { BlacklistManager, Utils } from "./lib";
+import { AutoMod, BlacklistManager, Utils, ServiceHandler } from "./lib";
 
 import "@daangamesdg/sapphire-logger/register";
 
@@ -12,6 +12,10 @@ export class Client extends SapphireClient {
 	// Classes
 	public prisma = new PrismaClient();
 	public utils: Utils = new Utils(this);
+	public automod: AutoMod = new AutoMod(this);
+
+	// ServiceHandler
+	public serviceHandler: ServiceHandler = new ServiceHandler(this);
 
 	// managers
 	public blacklistManager: BlacklistManager = new BlacklistManager(this);
@@ -47,6 +51,7 @@ export class Client extends SapphireClient {
 		const blacklisted = await this.prisma.botBlacklist.findMany();
 		this.blacklistManager.setBlacklisted(blacklisted.map((b) => b.id));
 
+		await this.serviceHandler.start();
 		await this.login(process.env.TOKEN);
 	}
 

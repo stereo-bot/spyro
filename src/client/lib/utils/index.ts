@@ -29,6 +29,10 @@ export class Utils {
 		return `<t:${time}:${type}>`;
 	}
 
+	public cleanText(str: string): string {
+		return str.replace(/\*/g, "").replace(/`/g, "").replace(/|/g, "").replace(/_/g, "").replace(/\\/g, "");
+	}
+
 	public getColour(manager: GuildMemberRoleManager) {
 		return manager.hoist && manager.hoist.color > 0
 			? manager.hoist.hexColor
