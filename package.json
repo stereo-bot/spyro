@@ -29,7 +29,7 @@
 		"@daangamesdg/sapphire-logger": "^1.0.4",
 		"@prisma/client": "^3.14.0",
 		"@sapphire/decorators": "^4.3.4",
-		"@sapphire/framework": "pr-293",
+		"@sapphire/framework": "next",
 		"@sapphire/plugin-subcommands": "^2.2.0",
 		"@sapphire/type": "^2.2.4",
 		"axios": "^0.27.2",
