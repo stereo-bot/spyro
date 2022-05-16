@@ -1,7 +1,15 @@
 import { Collection, Invite } from "discord.js";
 import type { Client } from "../../../client";
 import { INVITE_REGEX, ZALGO_REGEX } from "./regex";
-import type { AutoModDupCache, AutoModResults, AutoModXFilter, AutomodXFilterOptions, GuildMessage, phishingLinksData } from "./types";
+import type {
+	AutoModBadwordsOptions,
+	AutoModDupCache,
+	AutoModResults,
+	AutoModXFilter,
+	AutomodXFilterOptions,
+	GuildMessage,
+	phishingLinksData
+} from "./types";
 import { clean } from "unzalgo";
 
 export class AutoMod {
@@ -25,6 +33,7 @@ export class AutoMod {
 			this.dupText(cleanMessage),
 			this.phishingCheck(cleanMessage),
 			this.zalgo(message),
+			this.badwords(message, { blacklisted: ["test"], whitelisted: ["test1"] }),
 			this.spam(message, { amount: 7, duration: 5e3 }),
 			this.mention(message, { amount: 7, duration: 5e3 })
 		]);
@@ -208,6 +217,34 @@ export class AutoMod {
 		}
 
 		return null;
+	}
+
+	public badwords(message: GuildMessage, options: AutoModBadwordsOptions): AutoModResults | null {
+		const content = this.client.utils.cleanText(message.content.toLowerCase());
+		if (!content) return null;
+
+		const words = message.content
+			.split(/\s+/)
+			.map((word) =>
+				options.blacklisted.some((str) => word.includes(str.toLowerCase())) &&
+				!options.whitelisted.some((str) => word.includes(str.toLowerCase()))
+					? word
+					: null
+			)
+			.filter((w) => w !== null)
+			.join(", ");
+
+		if (!words) return null;
+
+		return {
+			guild: message.guildId,
+			user: message.author.id,
+			date: Date.now(),
+			key: "AUTOMOD_BAD_WORDS",
+			vars: {
+				words
+			}
+		};
 	}
 
 	private unZalgo(str: string) {

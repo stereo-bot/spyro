@@ -33,6 +33,11 @@ export interface AutomodXFilterOptions {
 	duration: number;
 }
 
+export interface AutoModBadwordsOptions {
+	whitelisted: string[];
+	blacklisted: string[];
+}
+
 /**
  * Key for the object is **userId-guildId**
  */
