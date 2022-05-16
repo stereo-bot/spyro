@@ -22,6 +22,17 @@ export interface AutoModCacheDupData {
 	timeout: NodeJS.Timeout;
 }
 
+export interface AutoModXFilter {
+	count: number;
+	lastMessage: Message;
+	timer: NodeJS.Timeout;
+}
+
+export interface AutomodXFilterOptions {
+	amount: number;
+	duration: number;
+}
+
 /**
  * Key for the object is **userId-guildId**
  */
