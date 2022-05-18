@@ -15,7 +15,7 @@ model botBlacklist {
 }
 
 model GuildConfig {
-  id      String         @id
+  id      String         @id @unique
   automod AutoModConfig? @relation("automod")
   logging LoggingConfig? @relation("logging")
 }
