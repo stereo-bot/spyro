@@ -24,8 +24,10 @@ model AutoModConfig {
   guildId String      @unique
   guild   GuildConfig @relation("automod", fields: [guildId], references: [id])
 
-  moduleEnabled Boolean @default(false)
-  MuteDuration  Int     @default(600) // duration in seconds (max 24 hours)
+  moduleEnabled   Boolean  @default(false)
+  MuteDuration    Int      @default(600) // duration in seconds (max 24 hours)
+  globalWhitelist String[]
+
 
   inviteEnabled   Boolean          @default(true)
   inviteDelete    Boolean          @default(true)
