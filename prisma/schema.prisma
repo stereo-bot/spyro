@@ -13,3 +13,77 @@ datasource db {
 model botBlacklist {
   id String @id
 }
+
+model GuildConfig {
+  id      String         @id
+  automod AutoModConfig? @relation("automod")
+  logging LoggingConfig? @relation("logging")
+}
+
+model AutoModConfig {
+  guildId String      @unique
+  guild   GuildConfig @relation("automod", fields: [guildId], references: [id])
+
+  moduleEnabled Boolean @default(false)
+  MuteDuration  Int     @default(600) // duration in seconds (max 24 hours)
+
+  inviteEnabled   Boolean          @default(true)
+  inviteDelete    Boolean          @default(true)
+  inviteAction    ModerationAction @default(WARN)
+  inviteWhitelist String[]
+
+
+  DupTextEnabled   Boolean          @default(true)
+  DupTextDelete    Boolean          @default(false)
+  DupTextAction    ModerationAction @default(VERBAL)
+  DupTextWhitelist String[]
+
+  SpamEnabled   Boolean          @default(true)
+  SpamDelete    Boolean          @default(true)
+  SpamAction    ModerationAction @default(MUTE)
+  SpamWhitelist String[]
+
+  PhishingEnabled   Boolean          @default(true)
+  PhishingDelete    Boolean          @default(true)
+  PhishingAction    ModerationAction @default(BAN)
+  PhishingWhitelist String[]
+
+  MassMentionEnabled   Boolean          @default(true)
+  MassMentionDelete    Boolean          @default(true)
+  MassMentionAction    ModerationAction @default(MUTE)
+  MassMentionWhitelist String[]
+
+  ZalgoEnabled   Boolean          @default(true)
+  ZalgoDelete    Boolean          @default(true)
+  ZalgoAction    ModerationAction @default(WARN)
+  ZalgoWhitelist String[]
+
+  BadwordsEnabled     Boolean          @default(true)
+  BadwordsDelete      Boolean          @default(true)
+  BadwordsAction      ModerationAction @default(WARN)
+  BadwordsWhitelist   String[]
+  BadwordsAllowedList String[] // whitelisted words
+  BadwordsBlockedList String[] // blacklisted words
+}
+
+model LoggingConfig {
+  guildId String      @unique
+  guild   GuildConfig @relation("logging", fields: [guildId], references: [id])
+
+  moduleEnabled Boolean @default(false)
+
+  messageEnabled Boolean @default(true)
+  messageChannel String?
+  messageWebhook String?
+
+  modEnabled Boolean @default(true)
+  modChannel String?
+  modWebhook String?
+}
+
+enum ModerationAction {
+  VERBAL
+  WARN
+  MUTE
+  BAN
+}
