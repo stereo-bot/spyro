@@ -12,7 +12,10 @@ export default class extends Listener {
 			select: { automod: true, logging: true, id: true }
 		});
 		if (!guildConfig)
-			guildConfig = await this.client.prisma.guildConfig.create({ data: { id: guild.id }, select: { automod: true, logging: true, id: true } });
+			guildConfig = await this.client.prisma.guildConfig.create({
+				data: { id: guild.id, automod: { create: {} }, logging: { create: {} } },
+				select: { automod: true, logging: true, id: true }
+			});
 		this.client.guildConfig.set(guild.id, guildConfig as unknown as FullGuildConfig);
 	}
 }
