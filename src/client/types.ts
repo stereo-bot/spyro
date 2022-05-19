@@ -1,3 +1,6 @@
 import type { AutoModConfig, GuildConfig, LoggingConfig } from "@prisma/client";
 
-export type FullGuildConfig = GuildConfig & AutoModConfig & LoggingConfig;
+export type FullGuildConfig = GuildConfig & {
+	automod: AutoModConfig;
+	logging: LoggingConfig;
+};

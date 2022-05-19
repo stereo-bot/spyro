@@ -47,3 +47,5 @@ export interface phishingLinksData {
 	suspicious: string[];
 	guaranteed: string[];
 }
+
+export type AutoModModuleFunctionResult = Promise<AutoModResults | null> | (AutoModResults | null);

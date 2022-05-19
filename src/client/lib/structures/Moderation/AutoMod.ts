@@ -4,6 +4,7 @@ import { INVITE_REGEX, ZALGO_REGEX } from "./regex";
 import type {
 	AutoModBadwordsOptions,
 	AutoModDupCache,
+	AutoModModuleFunctionResult,
 	AutoModResults,
 	AutoModXFilter,
 	AutomodXFilterOptions,
@@ -28,15 +29,29 @@ export class AutoMod {
 		const cleanMessage = message;
 		cleanMessage.content = this.unZalgo(message.content);
 
-		const results = await Promise.all([
-			this.invite(cleanMessage),
-			this.dupText(cleanMessage),
-			this.phishingCheck(cleanMessage),
-			this.zalgo(message),
-			this.badwords(message, { blacklisted: ["test"], whitelisted: ["test1"] }),
-			this.spam(message, { amount: 7, duration: 5e3 }),
-			this.mention(message, { amount: 7, duration: 5e3 })
-		]);
+		if (message.author.bot || message.webhookId) return;
+
+		const config = this.client.guildConfig.get(message.guildId)!;
+		if (!this.shouldAdd(message, config.automod.globalWhitelist)) return;
+
+		const badwordsConfig = { blacklisted: config.automod.BadwordsBlockedList, whitelisted: config.automod.BadwordsAllowedList };
+		const spamConfig = { amount: config.automod.SpamAmount, duration: config.automod.SpamDuration * 1e3 };
+		const mentionConfig = { amount: config.automod.MassMentionAmount, duration: config.automod.MassMentionDuration * 1e3 };
+
+		const automodModules: AutoModModuleFunctionResult[] = [];
+		if (config.automod.inviteEnabled && this.shouldAdd(message, config.automod.inviteWhitelist)) automodModules.push(this.invite(cleanMessage));
+		if (config.automod.DupTextEnabled && this.shouldAdd(message, config.automod.DupTextWhitelist))
+			automodModules.push(this.dupText(cleanMessage));
+		if (config.automod.PhishingEnabled && this.shouldAdd(message, config.automod.PhishingWhitelist))
+			automodModules.push(this.phishingCheck(cleanMessage));
+		if (config.automod.BadwordsEnabled && this.shouldAdd(message, config.automod.BadwordsWhitelist))
+			automodModules.push(this.badwords(cleanMessage, badwordsConfig));
+		if (config.automod.SpamEnabled && this.shouldAdd(message, config.automod.SpamWhitelist)) automodModules.push(this.spam(message, spamConfig));
+		if (config.automod.MassMentionEnabled && this.shouldAdd(message, config.automod.MassMentionWhitelist))
+			automodModules.push(this.mention(message, mentionConfig));
+		if (config.automod.ZalgoEnabled && this.shouldAdd(message, config.automod.ZalgoWhitelist)) automodModules.push(this.zalgo(message));
+
+		const results = await Promise.all(automodModules);
 		console.log(results);
 	}
 
@@ -249,5 +264,16 @@ export class AutoMod {
 
 	private unZalgo(str: string) {
 		return clean(str);
+	}
+
+	private shouldAdd(message: GuildMessage, whitelist: string[]): boolean {
+		const channel = `CHANNEL-${message.channelId}`;
+		const user = `ROLE-${message.author.id}`;
+		const roles = message.member.roles.cache.map((role) => `ROLE-${role.id}`);
+
+		if (whitelist.includes(channel) || whitelist.includes(user)) return false;
+		if (roles.some((role) => whitelist.includes(role))) return false;
+
+		return true;
 	}
 }
