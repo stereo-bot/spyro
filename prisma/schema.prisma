@@ -44,6 +44,8 @@ model AutoModConfig {
   SpamDelete    Boolean          @default(true)
   SpamAction    ModerationAction @default(MUTE)
   SpamWhitelist String[]
+  SpamDuration  Int              @default(5) // max 10s
+  SpamAmount    Int              @default(7) // max 20
 
   PhishingEnabled   Boolean          @default(true)
   PhishingDelete    Boolean          @default(true)
@@ -54,6 +56,8 @@ model AutoModConfig {
   MassMentionDelete    Boolean          @default(true)
   MassMentionAction    ModerationAction @default(MUTE)
   MassMentionWhitelist String[]
+  MassMentionDuration  Int              @default(5) // max 10s
+  MassMentionAmount    Int              @default(7) // max 20
 
   ZalgoEnabled   Boolean          @default(true)
   ZalgoDelete    Boolean          @default(true)
