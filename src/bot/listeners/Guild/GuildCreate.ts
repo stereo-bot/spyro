@@ -1,4 +1,4 @@
-import { FullGuildConfig, Listener } from "../../../client";
+import { Listener } from "../../../client";
 import { ApplyOptions } from "@sapphire/decorators";
 import type { Guild } from "discord.js";
 
@@ -6,16 +6,6 @@ import type { Guild } from "discord.js";
 export default class extends Listener {
 	public async run(guild: Guild) {
 		this.container.logger.debug(`[GUILD]: New guild joined - ${guild.name} (${guild.id})`);
-
-		let guildConfig = await this.client.prisma.guildConfig.findUnique({
-			where: { id: guild.id },
-			select: { automod: true, logging: true, id: true }
-		});
-		if (!guildConfig)
-			guildConfig = await this.client.prisma.guildConfig.create({
-				data: { id: guild.id, automod: { create: {} }, logging: { create: {} } },
-				select: { automod: true, logging: true, id: true }
-			});
-		this.client.guildConfig.set(guild.id, guildConfig as unknown as FullGuildConfig);
+		await this.client.configManager.load(guild.id);
 	}
 }
