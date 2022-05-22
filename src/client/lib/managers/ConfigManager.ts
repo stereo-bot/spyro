@@ -100,6 +100,12 @@ export class ConfigManager {
 				select: { automod: true, logging: true, id: true }
 			});
 		this.guildConfig.set(guildId, guildConfig as unknown as FullGuildConfig);
+
+		const timeout = this.timeouts.get(guildId);
+		if (timeout) {
+			clearTimeout(timeout.timeout);
+			this.timeouts.delete(guildId);
+		}
 	}
 
 	public get(id: string): FullGuildConfig {
