@@ -53,11 +53,18 @@ const getMockConfig = (id: string): FullGuildConfig => ({
 		modChannel: null,
 		modWebhook: null
 	},
-	id
+	id,
+	leaveTimestamp: null
 });
+
+interface ConfigTimeout {
+	id: string;
+	timeout: NodeJS.Timeout;
+}
 
 export class ConfigManager {
 	public guildConfig = new Collection<string, FullGuildConfig>();
+	public timeouts = new Collection<string, ConfigTimeout>();
 
 	public constructor(public client: Client) {}
 
@@ -101,5 +108,53 @@ export class ConfigManager {
 		this.guildConfig.set(id, updated as FullGuildConfig);
 
 		return updated;
+	}
+
+	public scheduleDeleteAll() {
+		const deleted = this.guildConfig.filter((g) => Boolean(g.leaveTimestamp) && !this.timeouts.has(g.id));
+		deleted.forEach((config) => {
+			const getTime = () => {
+				const futureDate = config.leaveTimestamp!.getMilliseconds() + 6048e5;
+				const now = Date.now();
+
+				return futureDate - now;
+			};
+
+			const timeout = setTimeout(async () => {
+				await this.client.prisma.guildConfig.update({
+					where: { id: config.id },
+					data: { automod: { delete: true }, logging: { delete: true } }
+				});
+				await this.client.prisma.guildConfig.delete({ where: { id: config.id } });
+				this.guildConfig.delete(config.id);
+				this.timeouts.delete(config.id);
+			}, getTime());
+
+			this.timeouts.set(config.id, { timeout, id: config.id });
+		});
+	}
+
+	public scheduleDelete(id: string) {
+		const config = this.guildConfig.get(id);
+		if (!config || this.timeouts.has(id)) return;
+
+		const getTime = () => {
+			const futureDate = config.leaveTimestamp!.getMilliseconds() + 6048e5;
+			const now = Date.now();
+
+			return futureDate - now;
+		};
+
+		const timeout = setTimeout(async () => {
+			await this.client.prisma.guildConfig.update({
+				where: { id: config.id },
+				data: { automod: { delete: true }, logging: { delete: true } }
+			});
+			await this.client.prisma.guildConfig.delete({ where: { id: config.id } });
+			this.guildConfig.delete(config.id);
+			this.timeouts.delete(config.id);
+		}, getTime());
+
+		this.timeouts.set(config.id, { timeout, id: config.id });
 	}
 }
