@@ -81,6 +81,8 @@ export class ConfigManager {
 				});
 			this.guildConfig.set(guild.id, guildConfig as unknown as FullGuildConfig);
 		});
+
+		this.scheduleDeleteAll();
 	}
 
 	public async load(guildId: string) {
