@@ -128,10 +128,11 @@ export class ConfigManager {
 					data: { automod: { delete: true }, logging: { delete: true } }
 				});
 				await this.client.prisma.guildConfig.delete({ where: { id: config.id } });
-				this.guildConfig.delete(config.id);
+
 				this.timeouts.delete(config.id);
 			}, getTime());
 
+			this.guildConfig.delete(config.id);
 			this.timeouts.set(config.id, { timeout, id: config.id });
 		});
 	}
@@ -153,10 +154,10 @@ export class ConfigManager {
 				data: { automod: { delete: true }, logging: { delete: true } }
 			});
 			await this.client.prisma.guildConfig.delete({ where: { id: config.id } });
-			this.guildConfig.delete(config.id);
 			this.timeouts.delete(config.id);
 		}, getTime());
 
+		this.guildConfig.delete(config.id);
 		this.timeouts.set(config.id, { timeout, id: config.id });
 	}
 }
