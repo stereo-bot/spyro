@@ -109,7 +109,7 @@ export class ConfigManager {
 		const updated = await this.client.prisma.guildConfig.update({ where: { id }, data, select: { automod: true, id: true, logging: true } });
 		this.guildConfig.set(id, updated as FullGuildConfig);
 
-		return updated;
+		return updated as FullGuildConfig;
 	}
 
 	public scheduleDeleteAll() {
@@ -137,9 +137,11 @@ export class ConfigManager {
 		});
 	}
 
-	public scheduleDelete(id: string) {
-		const config = this.guildConfig.get(id);
+	public async scheduleDelete(id: string) {
+		let config = this.guildConfig.get(id)!;
 		if (!config || this.timeouts.has(id)) return;
+
+		config = await this.update(config.id, { leaveTimestamp: new Date() });
 
 		const getTime = () => {
 			const futureDate = config.leaveTimestamp!.getMilliseconds() + 6048e5;
