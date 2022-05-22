@@ -68,21 +68,25 @@ export class ConfigManager {
 
 	public constructor(public client: Client) {}
 
-	public loadAll() {
-		this.client.guilds.cache.forEach(async (guild) => {
-			let guildConfig = await this.client.prisma.guildConfig.findUnique({
-				where: { id: guild.id },
+	public async loadAll() {
+		const configs = (await this.client.prisma.guildConfig.findMany({
+			select: { automod: true, logging: true, id: true }
+		})) as FullGuildConfig[];
+		const configsCollection = new Collection<string, FullGuildConfig>();
+		configs.forEach((c) => configsCollection.set(c.id, c));
+
+		const [active, inactive] = configsCollection.partition((config) => this.client.guilds.cache.has(config.id));
+		active.forEach((config) => this.guildConfig.set(config.id, config));
+		inactive.forEach((config) => this.scheduleDelete(config.id));
+
+		const [, newGuilds] = this.client.guilds.cache.partition((g) => this.guildConfig.has(g.id));
+		newGuilds.forEach(async (g) => {
+			const guildConfig = await this.client.prisma.guildConfig.create({
+				data: { id: g.id, automod: { create: {} }, logging: { create: {} } },
 				select: { automod: true, logging: true, id: true }
 			});
-			if (!guildConfig)
-				guildConfig = await this.client.prisma.guildConfig.create({
-					data: { id: guild.id, automod: { create: {} }, logging: { create: {} } },
-					select: { automod: true, logging: true, id: true }
-				});
-			this.guildConfig.set(guild.id, guildConfig as unknown as FullGuildConfig);
+			this.guildConfig.set(g.id, guildConfig as unknown as FullGuildConfig);
 		});
-
-		this.scheduleDeleteAll();
 	}
 
 	public async load(guildId: string) {
@@ -112,36 +116,11 @@ export class ConfigManager {
 		return updated as FullGuildConfig;
 	}
 
-	public scheduleDeleteAll() {
-		const deleted = this.guildConfig.filter((g) => Boolean(g.leaveTimestamp) && !this.timeouts.has(g.id));
-		deleted.forEach((config) => {
-			const getTime = () => {
-				const futureDate = config.leaveTimestamp!.getMilliseconds() + 6048e5;
-				const now = Date.now();
-
-				return futureDate - now;
-			};
-
-			const timeout = setTimeout(async () => {
-				await this.client.prisma.guildConfig.update({
-					where: { id: config.id },
-					data: { automod: { delete: true }, logging: { delete: true } }
-				});
-				await this.client.prisma.guildConfig.delete({ where: { id: config.id } });
-
-				this.timeouts.delete(config.id);
-			}, getTime());
-
-			this.guildConfig.delete(config.id);
-			this.timeouts.set(config.id, { timeout, id: config.id });
-		});
-	}
-
 	public async scheduleDelete(id: string) {
 		let config = this.guildConfig.get(id)!;
-		if (!config || this.timeouts.has(id)) return;
 
-		config = await this.update(config.id, { leaveTimestamp: new Date() });
+		if (!config || this.timeouts.has(id)) return;
+		if (!config.leaveTimestamp) config = await this.update(config.id, { leaveTimestamp: new Date() });
 
 		const getTime = () => {
 			const futureDate = config.leaveTimestamp!.getMilliseconds() + 6048e5;
