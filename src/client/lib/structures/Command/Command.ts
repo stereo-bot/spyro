@@ -65,6 +65,8 @@ export abstract class Command extends SubCommandPluginCommand<CommandArgs, Comma
 			guildIds: process.env.NODE_ENV === "development" || this.OwnerOnly ? guildIds : undefined
 		};
 
+		console.log(this.client.localeManager.getCommandData("test", "en"));
+
 		if (this.options.chatInputCommand.messageCommand)
 			registery.registerChatInputCommand(
 				{
