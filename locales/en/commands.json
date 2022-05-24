@@ -1,0 +1,11 @@
+{
+	"test": {
+		"description": "this is a test",
+		"options": {
+			"option1": {
+				"name": "option1 name",
+				"description": "option1 description"
+			}
+		}
+	}
+}
