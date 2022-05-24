@@ -1,0 +1,11 @@
+{
+	"help": {
+		"description": "Een lijst met alle commando's",
+		"options": {
+			"command": {
+				"name": "commando",
+				"description": "De naam van het commando"
+			}
+		}
+	}
+}
