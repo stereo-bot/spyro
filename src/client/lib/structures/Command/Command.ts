@@ -54,6 +54,10 @@ export abstract class Command extends SubCommandPluginCommand<CommandArgs, Comma
 		this.options.cooldownFilteredUsers = this.client.owners;
 	}
 
+	public get t() {
+		return this.client.localeManager.translate.bind(this.client.localeManager);
+	}
+
 	public override registerApplicationCommands(registery: ApplicationCommandRegistry) {
 		if (!this.options.chatInputCommand || !this.options.enabled) return;
 
@@ -74,8 +78,6 @@ export abstract class Command extends SubCommandPluginCommand<CommandArgs, Comma
 
 			const data = this.client.localeManager.getCommandData(this.name, lang);
 			if (!data) return;
-
-			console.log(data, lang);
 
 			descriptionLocalizations[lang] = data.description;
 			commandOptions = commandOptions.map((opt) => {
