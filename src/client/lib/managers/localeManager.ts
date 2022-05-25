@@ -20,9 +20,8 @@ export class LocaleManager {
 		this.languages = this.read(join(process.cwd(), "locales"));
 	}
 
-	public translate(id: string | null | undefined, path: string, vars: Record<string, unknown> = {}): string {
-		// @ts-ignore aaa
-		const language = (id ? this.client.configManager.get(id)?.language : null) ?? "en";
+	public translate(locale: string, path: string, vars: Record<string, unknown> = {}): string {
+		const language = this.getLocale(locale);
 		const emojis = Object.keys(constants.emojis).reduce(
 			(o, key) =>
 				Object.assign(o, {
@@ -93,5 +92,11 @@ export class LocaleManager {
 		}
 
 		return data;
+	}
+
+	private getLocale(locale: string) {
+		if (Object.keys(this.languages).includes(locale)) return locale;
+
+		return "en";
 	}
 }
