@@ -1,0 +1,25 @@
+{
+	"ping": {
+		"response": "Pong! ❤️ Heartbeat: {heartbeat}ms, 📍 Roundtrip: {roundtrip}ms!"
+	},
+	"help": {
+		"title": "{command} Command",
+		"description": "Find all the information about all the commands with a simple search query.",
+		"info": {
+			"details": {
+				"title": "Details",
+				"usage": "Usage: `/{command}`",
+				"category": "Category: `{category}`"
+			},
+			"permissions": {
+				"title": "Permissions",
+				"user": "User: `{permissions}`",
+				"bot": "Bot: `{permissions}`"
+			},
+			"ratelimit": {
+				"title": "Ratelimit",
+				"message": "You can run this command **{amount} time(s)** every **{duration}**."
+			}
+		}
+	}
+}

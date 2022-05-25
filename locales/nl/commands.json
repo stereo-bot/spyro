@@ -1,6 +1,7 @@
 {
 	"help": {
 		"description": "Een lijst met alle commando's",
+		"usage": "[commando]",
 		"options": {
 			"command": {
 				"name": "commando",

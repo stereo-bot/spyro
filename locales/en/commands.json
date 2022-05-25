@@ -1,6 +1,7 @@
 {
 	"help": {
 		"description": "A list of all the commands",
+		"usage": "[command]",
 		"options": {
 			"command": {
 				"name": "command",

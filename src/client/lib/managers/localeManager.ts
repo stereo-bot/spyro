@@ -39,12 +39,14 @@ export class LocaleManager {
 
 		const parsed = this.parse(lang.commands);
 		const description = dotprop.get(parsed, `${command}.description`) as string;
+		const usage = dotprop.get(parsed, `${command}.usage`) as string;
 		const options = (dotprop.get(parsed, `${command}.options`) ?? {}) as LocaleCommandOptions;
 
 		if (!description) return null;
 
 		return {
 			description,
+			usage,
 			options
 		};
 	}

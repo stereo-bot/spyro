@@ -1,0 +1,25 @@
+{
+	"ping": {
+		"response": "Pong! ❤️ Hartslag: {heartbeat}ms, 📍 Rondreis: {roundtrip}ms!"
+	},
+	"help": {
+		"title": "{command} Commando",
+		"description": "Vind all de informatie over elke commando met één simpele zoekopdracht.",
+		"info": {
+			"details": {
+				"title": "Details",
+				"usage": "Gebruik: `/{command}`",
+				"category": "Categorie: `{category}`"
+			},
+			"permissions": {
+				"title": "Permissies",
+				"user": "Gebruiker: `{permissions}`",
+				"bot": "Bot: `{permissions}`"
+			},
+			"ratelimit": {
+				"title": "Limiet",
+				"message": "Je kan dit commando **{amount} keer** per **{duration}** gebruiken."
+			}
+		}
+	}
+}
