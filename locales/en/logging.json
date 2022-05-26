@@ -5,6 +5,11 @@
 			"title": "Message deleted in {channel}",
 			"footer": "Message deleted"
 		},
+		"delete_bulk": {
+			"title": "Messages deleted in {channel}",
+			"footer": "Messages deleted",
+			"description": "[Go to channel]({channel_link}) - You can find the deleted message contents in the attachment."
+		},
 		"update": {
 			"title": "Message updated in {channel}",
 			"footer": "Message updated",

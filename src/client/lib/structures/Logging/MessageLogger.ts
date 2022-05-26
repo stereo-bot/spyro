@@ -1,10 +1,12 @@
-import { Collection, MessageEmbed, WebhookClient } from "discord.js";
+import { Collection, MessageAttachment, MessageEmbed, WebhookClient } from "discord.js";
 import type { Client } from "../../../";
 import { EMBED_DANGER, EMBED_NEUTRAL } from "../../../constants";
 import type { GuildMessage } from "../";
+import moment from "moment";
 
 interface Queue {
 	embeds: MessageEmbed[];
+	attachments: MessageAttachment[];
 	guildId: string;
 }
 
@@ -76,8 +78,39 @@ export class MessageLogger {
 		this.sendLogs(embed, messageNew.guildId);
 	}
 
-	public sendLogs(embed: MessageEmbed, guildId: string) {
-		const collection = this.queue.get(guildId) || { embeds: [], guildId };
+	public onMessageDeleteBulk(messagesCol: Collection<string, GuildMessage>) {
+		const messages = messagesCol.filter((msg) => !msg.author.bot && !msg.webhookId && Boolean(msg.guild));
+		if (!messages.size) return;
+
+		const message = messages.first()!;
+		const locale = message.guild.preferredLocale;
+		const embed = this.client.utils.embed().setColor(EMBED_DANGER);
+
+		const title = this.t(locale, "logging:message.delete_bulk.title", {
+			channel: `#${message.channel.name}`
+		});
+		const footer = this.t(locale, "logging:message.delete_bulk.footer");
+		const description = this.t(locale, "logging:message.delete_bulk.description", {
+			channel_link: `https://discord.com/channels/${message.guildId}/${message.channelId}`
+		});
+
+		const content = messages.reverse().reduce((str, msg) => {
+			const attachments = msg.attachments.map((attachment) => `\r\n↳ Attachment: ${attachment.url}`).join("");
+			const date = moment(msg.createdTimestamp).utc().format("MMMM Do YYYY, h:mm:ss a");
+			const messageContent = msg.cleanContent ? msg.cleanContent.replace(/\n/g, "\r\n") : "-";
+
+			return (str += `[${date} (UTC)] - ${msg.author.tag} (${msg.author.id}): ${messageContent}${attachments}\r\n\r\n`);
+		}, "");
+
+		embed.setTitle(title).setFooter({ text: footer }).setTimestamp().setDescription(description);
+		const transcript = new MessageAttachment(Buffer.from(content), `logs-${message.channelId}.txt`);
+
+		this.sendLogs(embed, message.guildId, transcript);
+	}
+
+	public sendLogs(embed: MessageEmbed, guildId: string, attachment?: MessageAttachment) {
+		const collection = this.queue.get(guildId) || { embeds: [], attachments: [], guildId };
+		if (attachment) collection.attachments.push(attachment);
 		collection.embeds.push(embed);
 
 		this.queue.set(guildId, collection);
@@ -109,7 +142,7 @@ export class MessageLogger {
 				.map((_, i) => (i % chunkSize === 0 ? collection.embeds.slice(i, i + chunkSize) : null))
 				.filter((e) => e) as MessageEmbed[][];
 
-			const embeds: MessageEmbed[][] = [];
+			const embedChunks: MessageEmbed[][] = [];
 			groups.forEach((g) => {
 				let count = 0;
 				let arr: MessageEmbed[] = [];
@@ -117,7 +150,7 @@ export class MessageLogger {
 				g.forEach((m) => {
 					count += m.length;
 					if (count >= 6e3) {
-						embeds.push(arr);
+						embedChunks.push(arr);
 						count = m.length;
 						arr = [m];
 					} else {
@@ -125,19 +158,18 @@ export class MessageLogger {
 					}
 				});
 
-				embeds.push(arr);
+				embedChunks.push(arr);
 			});
 
 			const webhook = new WebhookClient({ url: messageWebhook });
 			await Promise.all(
-				embeds.map((embed) =>
-					webhook
-						.send({
-							avatarURL: this.client.user?.displayAvatarURL({ size: 4096 }),
-							embeds: embed
-						})
-						.catch(() => void 0)
-				)
+				embedChunks.map(async (embeds, index) => {
+					const files: MessageAttachment[] = [];
+					if (embedChunks.length === index + 1) files.push(...collection.attachments);
+
+					const avatarURL = this.client.user?.displayAvatarURL({ size: 4096 });
+					await webhook.send({ avatarURL, embeds, files }).catch(() => void 0);
+				})
 			);
 		} catch (e) {}
 	}

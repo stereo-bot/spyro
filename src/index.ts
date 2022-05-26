@@ -5,7 +5,7 @@ import { Client } from "./client";
 
 const client = new Client({
 	intents: ["GUILDS", "GUILD_MESSAGES"],
-	partials: ["MESSAGE"],
+	partials: ["MESSAGE", "CHANNEL"],
 	owners: (process.env.OWNERS ?? "").split(","),
 	activity: [
 		{
