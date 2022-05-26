@@ -40,6 +40,7 @@ export class MessageLogger {
 	}
 
 	public onMessageUpdate(messageOld: GuildMessage, messageNew: GuildMessage) {
+		if (messageOld.content === messageNew.content) return;
 		const locale = messageNew.guild.preferredLocale;
 
 		const embed = this.client.utils
