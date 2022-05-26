@@ -39,7 +39,7 @@ export abstract class Command extends SubCommandPluginCommand<CommandArgs, Comma
 
 		if (!options.name) this.container.logger.warn(`No name provided for command with aliases "${this.aliases.join('", "')}"`);
 
-		this.usage = `${options.name} ${options.usage ?? ""}`.trim();
+		this.usage = options.usage ?? "";
 
 		this.hidden = options.hidden ?? false;
 		this.OwnerOnly = options.preconditions?.includes("OwnerOnly") ?? false;
@@ -54,6 +54,10 @@ export abstract class Command extends SubCommandPluginCommand<CommandArgs, Comma
 		this.options.cooldownFilteredUsers = this.client.owners;
 	}
 
+	public get t() {
+		return this.client.localeManager.translate.bind(this.client.localeManager);
+	}
+
 	public override registerApplicationCommands(registery: ApplicationCommandRegistry) {
 		if (!this.options.chatInputCommand || !this.options.enabled) return;
 
@@ -65,12 +69,40 @@ export abstract class Command extends SubCommandPluginCommand<CommandArgs, Comma
 			guildIds: process.env.NODE_ENV === "development" || this.OwnerOnly ? guildIds : undefined
 		};
 
+		const descriptionLocalizations: Record<string, string> = {};
+		let commandOptions = this.options.chatInputCommand.options ?? [];
+
+		const languages = Object.keys(this.client.localeManager.languages);
+		languages.forEach((lang) => {
+			if (lang === "en") return;
+
+			const data = this.client.localeManager.getCommandData(this.name, lang);
+			if (!data) return;
+
+			descriptionLocalizations[lang] = data.description;
+			commandOptions = commandOptions.map((opt) => {
+				const optionData = data.options[opt.name];
+				if (!optionData) return opt;
+
+				if (!opt.nameLocalizations) opt.nameLocalizations = {};
+				if (!opt.descriptionLocalizations) opt.descriptionLocalizations = {};
+
+				// @ts-ignore localisationMap not exported so can't use them to change the type of lang
+				opt.nameLocalizations[lang] = optionData.name;
+				// @ts-ignore localisationMap not exported so can't use them to change the type of lang
+				opt.descriptionLocalizations[lang] = optionData.description;
+
+				return opt;
+			});
+		});
+
 		if (this.options.chatInputCommand.messageCommand)
 			registery.registerChatInputCommand(
 				{
 					name: this.name,
 					description: this.description,
-					options: this.options.chatInputCommand.options
+					options: commandOptions,
+					descriptionLocalizations
 				},
 				options
 			);

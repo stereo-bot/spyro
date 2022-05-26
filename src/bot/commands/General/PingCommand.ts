@@ -1,7 +1,6 @@
 import { Command } from "../../../client/";
 import { ApplyOptions } from "@sapphire/decorators";
 import type { CommandInteraction, Message } from "discord.js";
-import ms from "ms";
 
 @ApplyOptions<Command.Options>({
 	name: "ping",
@@ -14,48 +13,25 @@ import ms from "ms";
 })
 export default class extends Command {
 	public async messageRun(message: Message): Promise<void> {
-		const msg = await message.reply(">>> 🏓 | Pinging...");
-
-		await msg.edit({
-			content: null,
-			embeds: [
-				this.client.utils
-					.embed()
-					.setTitle("🏓 Pong!")
-					.setDescription(
-						[
-							`API Latency: \`${this.client.ws.ping}\` ms`,
-							`Edit Latency: \`${msg.createdTimestamp - message.createdTimestamp}\` ms`,
-							`Uptime: \`${ms(this.client.uptime ?? 0, {
-								long: true
-							})}\``
-						].join("\n")
-					)
-			]
-		});
+		const locale = message.guild?.preferredLocale || "en";
+		const msg = await message.reply(this.getTranslations("loading", locale));
+		await msg.edit(
+			this.getTranslations("response", locale, { heartbeat: this.client.ws.ping, roundtrip: msg.createdTimestamp - message.createdTimestamp })
+		);
 	}
 
 	public async chatInputRun(interaction: CommandInteraction): Promise<void> {
 		const interactionDate = Date.now();
-		await interaction.reply(">>> 🏓 | Pinging...");
-		const date = Date.now();
+		await interaction.reply(this.getTranslations("loading", interaction.locale));
 
-		await interaction.editReply({
-			content: null,
-			embeds: [
-				this.client.utils
-					.embed()
-					.setTitle("🏓 Pong!")
-					.setDescription(
-						[
-							`API Latency: \`${this.client.ws.ping}\` ms`,
-							`Edit Latency: \`${date - interactionDate}\` ms`,
-							`Uptime: \`${ms(this.client.uptime ?? 0, {
-								long: true
-							})}\``
-						].join("\n")
-					)
-			]
-		});
+		await interaction.editReply(
+			this.getTranslations("response", interaction.locale, { heartbeat: this.client.ws.ping, roundtrip: Date.now() - interactionDate })
+		);
+	}
+
+	private getTranslations(type: "loading" | "response", locale: string, vars?: Record<string, unknown>) {
+		if (type === "loading") return `🏓 | ${this.t(locale, "common:loading", vars)}...`;
+
+		return this.t(locale, "general:ping.response", vars);
 	}
 }

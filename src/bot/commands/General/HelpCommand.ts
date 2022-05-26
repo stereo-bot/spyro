@@ -1,7 +1,8 @@
 import { Command } from "../../../client/";
 import { ApplyOptions } from "@sapphire/decorators";
-import type { CommandInteraction, EmbedFieldData, Message, MessageEmbed, User } from "discord.js";
+import { CommandInteraction, EmbedFieldData, Message, MessageActionRow, MessageButton, MessageEmbed, Permissions, User } from "discord.js";
 import ms from "ms";
+import { INVITE_LINK, SUPPORT_SERVER, WEBSITE } from "../../../client/constants";
 
 @ApplyOptions<Command.Options>({
 	name: "help",
@@ -23,48 +24,111 @@ import ms from "ms";
 	}
 })
 export default class extends Command {
-	public async messageRun(message: Message, args: Command.Args, context: Command.MessageContext): Promise<void> {
+	public async messageRun(message: Message, args: Command.Args): Promise<void> {
+		const locale = message.guild?.preferredLocale || "en";
 		const cmd = await args.pickResult("string");
 		const command = this.container.stores.get("commands").get(cmd.value ?? "") as Command | undefined;
-		const embed = this.RunCommand(context, message.author, command);
 
-		await message.reply({ embeds: [embed] });
+		const embed = this.RunCommand(message.author, command, locale);
+		const buttons = this.getButtons(locale);
+
+		await message.reply({ embeds: [embed], components: [buttons] });
 	}
 
-	public async chatInputRun(interaction: CommandInteraction, context: Command.SlashCommandContext) {
+	public async chatInputRun(interaction: CommandInteraction) {
 		const cmd = interaction.options.getString("command", false);
 		const command = this.container.stores.get("commands").get(cmd ?? "") as Command | undefined;
-		const embed = this.RunCommand(context, interaction.user, command);
+
+		const embed = this.RunCommand(interaction.user, command, interaction.locale);
+		const buttons = this.getButtons(interaction.locale);
 
 		await interaction.reply({
-			embeds: [embed]
+			embeds: [embed],
+			components: [buttons]
 		});
 	}
 
-	private RunCommand(context: Command.MessageContext | Command.SlashCommandContext, user: User, command?: Command): MessageEmbed {
-		const embed = this.client.utils.embed().setTitle(`Help Command - ${user.tag}`).setFooter({
-			text: "Bot created by DaanGamesDG#7621",
-			iconURL: "https://static.daangamesdg.xyz/discord/pfp.gif"
-		});
+	private getButtons(locale: string) {
+		const basePath = `general:${this.name}`;
+
+		const buttons = new MessageActionRow().addComponents(
+			new MessageButton()
+				.setLabel(this.t(locale, `${basePath}.buttons.invite`))
+				.setStyle("LINK")
+				.setURL(INVITE_LINK),
+			new MessageButton()
+				.setLabel(this.t(locale, `${basePath}.buttons.support`))
+				.setStyle("LINK")
+				.setURL(SUPPORT_SERVER),
+			new MessageButton()
+				.setLabel(this.t(locale, `${basePath}.buttons.website`))
+				.setStyle("LINK")
+				.setURL(WEBSITE)
+		);
+
+		return buttons;
+	}
+
+	private RunCommand(user: User, command: Command | undefined, locale: string): MessageEmbed {
+		const embed = this.client.utils.embed();
+		const basePath = `general:${this.name}`;
 
 		if (command) {
-			const userPermissions = this.client.utils.formatPerms(command.permissions);
-			const clientPermissions = this.client.utils.formatPerms(command.clientPermissions);
+			embed.setTitle(this.t(locale, `${basePath}.title`, { command: command.name }));
+
+			const getTitle = (str: string) => `➤ **${str}**`;
+
+			const userPermissions =
+				new Permissions(command.permissions)
+					.toArray()
+					.map((str) => this.t(locale, `permissions:${str}`))
+					.join("` ") || "-";
+			const clientPermissions =
+				new Permissions(command.clientPermissions)
+					.toArray()
+					.map((str) => this.t(locale, `permissions:${str}`))
+					.join("` ") || "-";
+
+			const { description, usage: _usage } = this.client.localeManager.getCommandData(command.name, locale) ?? {
+				description: command.description,
+				options: {},
+				usage: command.usage
+			};
+
+			const detailsTitle = this.t(locale, `${basePath}.info.details.title`);
+			const usage = this.t(locale, `${basePath}.info.details.usage`, { command: `${command.name} ${_usage}` });
+			const category = this.t(locale, `${basePath}.info.details.category`, { category: this.category });
+
+			const permissionsTitle = this.t(locale, `${basePath}.info.permissions.title`);
+			const userPerms = this.t(locale, `${basePath}.info.permissions.user`, { permissions: userPermissions });
+			const botPerms = this.t(locale, `${basePath}.info.permissions.bot`, { permissions: clientPermissions });
+
+			const ratelimitTitle = this.t(locale, `${basePath}.info.ratelimit.title`);
+			const ratelimit = this.t(locale, `${basePath}.info.ratelimit.message`, {
+				amount: this.cooldownLimit,
+				duration: ms(this.cooldown)
+			});
 
 			embed.setDescription(
 				[
-					`>>> 🏷 | **Name**: ${command.name}`,
-					`📁 | **Category**: ${command.category}`,
-					`🔖 | **Aliases**: \`${command.aliases.join("`, `") || "-"}\`\n`,
-					`📋 | **Usage**: ${command.usage ? `${context.commandPrefix}${command.usage}` : "-"}`,
-					`📘 | **Description**: ${command.description ?? "-"}\n`,
-					`👮‍♂️ | **User Permissions**: ${userPermissions ?? "-"}`,
-					`🤖 | **Client Permissions**: ${clientPermissions ?? "-"}`,
-					`⌚ | **Cooldown**: \`${ms(command.cooldown, { long: false })}\``,
-					`🔢 | **Cooldown Limit**: \`${command.cooldownLimit}\``
+					description,
+					"",
+					getTitle(detailsTitle),
+					usage,
+					category,
+					"",
+					getTitle(permissionsTitle),
+					userPerms,
+					botPerms,
+					"",
+					getTitle(ratelimitTitle),
+					ratelimit
 				].join("\n")
 			);
 		} else {
+			embed.setTitle(this.t(locale, `${basePath}.title`, { command: this.name }));
+			embed.setDescription(this.t(locale, `${basePath}.description`));
+
 			const isOwner = this.client.isOwner(user.id);
 			const commands = [...this.container.stores.get("commands").values()] as Command[];
 			let categories = [...new Set(commands.map((c) => c.category ?? "default"))];

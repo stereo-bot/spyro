@@ -1,0 +1,15 @@
+{
+	"help": {
+		"description": "Een lijst met alle commando's",
+		"usage": "[commando]",
+		"options": {
+			"command": {
+				"name": "commando",
+				"description": "De naam van het commando"
+			}
+		}
+	},
+	"ping": {
+		"description": "Ping! Pong! 🏓"
+	}
+}
