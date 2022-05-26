@@ -1,6 +1,6 @@
 import { Collection, MessageEmbed, WebhookClient } from "discord.js";
 import type { Client } from "../../../";
-import { EMBED_DANGER } from "../../../constants";
+import { EMBED_DANGER, EMBED_NEUTRAL } from "../../../constants";
 import type { GuildMessage } from "../";
 
 interface Queue {
@@ -37,6 +37,41 @@ export class MessageLogger {
 			.setDescription(message.content ?? this.t(locale, "logging:message.no_content"));
 
 		this.sendLogs(embed, message.guildId);
+	}
+
+	public onMessageUpdate(messageOld: GuildMessage, messageNew: GuildMessage) {
+		const locale = messageNew.guild.preferredLocale;
+
+		const embed = this.client.utils
+			.embed()
+			.setColor(EMBED_NEUTRAL)
+			.setAuthor({
+				iconURL: messageNew.member.displayAvatarURL({ dynamic: true, size: 128 }),
+				name: `${messageNew.author.tag} (${messageNew.author.id})`
+			});
+
+		const title = this.t(locale, "logging:message.update.title", {
+			channel: `#${messageNew.channel.name}`
+		});
+		const footer = this.t(locale, "logging:message.update.footer");
+		const description = this.t(locale, "logging:message.update.description", {
+			message_link: messageNew.url,
+			channel_link: `https://discord.com/channels/${messageNew.guildId}/${messageNew.channelId}`
+		});
+		const beforeTitle = this.t(locale, "logging:message.update.before_title");
+		const afterTitle = this.t(locale, "logging:message.update.after_title");
+
+		const oldContent = messageOld.content.substring(0, 2e3);
+		const newContent = messageNew.content.substring(0, 2e3);
+
+		embed
+			.setTitle(title)
+			.setFooter({ text: footer })
+			.setTimestamp()
+			.setDescription(description)
+			.addFields({ name: `➤ ${beforeTitle}`, value: oldContent }, { name: `➤ ${afterTitle}`, value: newContent });
+
+		this.sendLogs(embed, messageNew.guildId);
 	}
 
 	public sendLogs(embed: MessageEmbed, guildId: string) {

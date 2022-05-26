@@ -4,6 +4,13 @@
 		"delete": {
 			"title": "Message deleted in {channel}",
 			"footer": "Message deleted"
+		},
+		"update": {
+			"title": "Message updated in {channel}",
+			"footer": "Message updated",
+			"description": "[Jump to message]({message_link}) - [Go to channel]({channel_link})",
+			"before_title": "Message before update",
+			"after_title": "Message after update"
 		}
 	}
 }
