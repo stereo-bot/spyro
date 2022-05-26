@@ -40,7 +40,10 @@ export default class extends Command {
 		const input = interaction.options.getString("command", false);
 		if (!input) return;
 
-		const search = new Fuse([...this.container.stores.get("commands").values()], {
+		let commands = [...this.container.stores.get("commands").values()] as Command[];
+		if (!this.client.isOwner(interaction.user.id)) commands = commands.filter((c) => !c.OwnerOnly);
+
+		const search = new Fuse(commands, {
 			keys: ["name", "description"]
 		});
 		const results = search.search(input);
