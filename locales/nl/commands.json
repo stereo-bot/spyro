@@ -8,5 +8,8 @@
 				"description": "De naam van het commando"
 			}
 		}
+	},
+	"ping": {
+		"description": "Ping! Pong! 🏓"
 	}
 }
