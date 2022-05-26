@@ -1,0 +1,9 @@
+{
+	"message": {
+		"no_content": "No message content",
+		"delete": {
+			"title": "Message deleted in {channel}",
+			"footer": "Message deleted"
+		}
+	}
+}
