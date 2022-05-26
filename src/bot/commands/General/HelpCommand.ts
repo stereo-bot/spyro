@@ -1,8 +1,19 @@
 import { Command } from "../../../client/";
 import { ApplyOptions } from "@sapphire/decorators";
-import { CommandInteraction, EmbedFieldData, Message, MessageActionRow, MessageButton, MessageEmbed, Permissions, User } from "discord.js";
+import {
+	AutocompleteInteraction,
+	CommandInteraction,
+	EmbedFieldData,
+	Message,
+	MessageActionRow,
+	MessageButton,
+	MessageEmbed,
+	Permissions,
+	User
+} from "discord.js";
 import ms from "ms";
 import { INVITE_LINK, SUPPORT_SERVER, WEBSITE } from "../../../client/constants";
+import Fuse from "fuse.js";
 
 @ApplyOptions<Command.Options>({
 	name: "help",
@@ -18,12 +29,25 @@ import { INVITE_LINK, SUPPORT_SERVER, WEBSITE } from "../../../client/constants"
 				name: "command",
 				type: "STRING",
 				description: "The name of the command",
-				required: false
+				required: false,
+				autocomplete: true
 			}
 		]
 	}
 })
 export default class extends Command {
+	public async autocompleteRun(interaction: AutocompleteInteraction) {
+		const input = interaction.options.getString("command", false);
+		if (!input) return;
+
+		const search = new Fuse([...this.container.stores.get("commands").values()], {
+			keys: ["name", "description"]
+		});
+		const results = search.search(input);
+
+		await interaction.respond(results.map((res) => ({ name: this.client.utils.capitalize(res.item.name), value: res.item.name })));
+	}
+
 	public async messageRun(message: Message, args: Command.Args): Promise<void> {
 		const locale = message.guild?.preferredLocale || "en";
 		const cmd = await args.pickResult("string");
