@@ -26,7 +26,7 @@ export class MessageLogger {
 			});
 
 		const title = this.t(locale, "logging:message.delete.title", {
-			channel: `#${message.channel}`
+			channel: `#${message.channel.name}`
 		});
 		const footer = this.t(locale, "logging:message.delete.footer");
 
