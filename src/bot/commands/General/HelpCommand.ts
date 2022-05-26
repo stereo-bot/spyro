@@ -90,9 +90,9 @@ export default class extends Command {
 					.join("` ") || "-";
 
 			const { description, usage: _usage } = this.client.localeManager.getCommandData(command.name, locale) ?? {
-				description: this.description,
+				description: command.description,
 				options: {},
-				usage: this.usage
+				usage: command.usage
 			};
 
 			const detailsTitle = this.t(locale, `${basePath}.info.details.title`);
