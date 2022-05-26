@@ -20,6 +20,11 @@
 				"title": "Limiet",
 				"message": "Je kan dit commando **{amount} keer** per **{duration}** gebruiken."
 			}
+		},
+		"buttons": {
+			"invite": "Invite",
+			"support": "Support",
+			"website": "Website"
 		}
 	}
 }

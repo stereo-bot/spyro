@@ -1,7 +1,8 @@
 import { Command } from "../../../client/";
 import { ApplyOptions } from "@sapphire/decorators";
-import { CommandInteraction, EmbedFieldData, Message, MessageEmbed, Permissions, User } from "discord.js";
+import { CommandInteraction, EmbedFieldData, Message, MessageActionRow, MessageButton, MessageEmbed, Permissions, User } from "discord.js";
 import ms from "ms";
+import { INVITE_LINK, SUPPORT_SERVER, WEBSITE } from "../../../client/constants";
 
 @ApplyOptions<Command.Options>({
 	name: "help",
@@ -23,32 +24,52 @@ import ms from "ms";
 	}
 })
 export default class extends Command {
-	public async messageRun(message: Message, args: Command.Args, context: Command.MessageContext): Promise<void> {
+	public async messageRun(message: Message, args: Command.Args): Promise<void> {
 		const locale = message.guild?.preferredLocale || "en";
 		const cmd = await args.pickResult("string");
 		const command = this.container.stores.get("commands").get(cmd.value ?? "") as Command | undefined;
 
-		const embed = this.RunCommand(context, message.author, command, locale);
+		const embed = this.RunCommand(message.author, command, locale);
+		const buttons = this.getButtons(locale);
 
-		await message.reply({ embeds: [embed] });
+		await message.reply({ embeds: [embed], components: [buttons] });
 	}
 
-	public async chatInputRun(interaction: CommandInteraction, context: Command.SlashCommandContext) {
+	public async chatInputRun(interaction: CommandInteraction) {
 		const cmd = interaction.options.getString("command", false);
 		const command = this.container.stores.get("commands").get(cmd ?? "") as Command | undefined;
-		const embed = this.RunCommand(context, interaction.user, command, interaction.locale);
+
+		const embed = this.RunCommand(interaction.user, command, interaction.locale);
+		const buttons = this.getButtons(interaction.locale);
 
 		await interaction.reply({
-			embeds: [embed]
+			embeds: [embed],
+			components: [buttons]
 		});
 	}
 
-	private RunCommand(
-		context: Command.MessageContext | Command.SlashCommandContext,
-		user: User,
-		command: Command | undefined,
-		locale: string
-	): MessageEmbed {
+	private getButtons(locale: string) {
+		const basePath = `general:${this.name}`;
+
+		const buttons = new MessageActionRow().addComponents(
+			new MessageButton()
+				.setLabel(this.t(locale, `${basePath}.buttons.invite`))
+				.setStyle("LINK")
+				.setURL(INVITE_LINK),
+			new MessageButton()
+				.setLabel(this.t(locale, `${basePath}.buttons.support`))
+				.setStyle("LINK")
+				.setURL(SUPPORT_SERVER),
+			new MessageButton()
+				.setLabel(this.t(locale, `${basePath}.buttons.website`))
+				.setStyle("LINK")
+				.setURL(WEBSITE)
+		);
+
+		return buttons;
+	}
+
+	private RunCommand(user: User, command: Command | undefined, locale: string): MessageEmbed {
 		const embed = this.client.utils.embed();
 		const basePath = `general:${this.name}`;
 
@@ -87,21 +108,6 @@ export default class extends Command {
 				amount: this.cooldownLimit,
 				duration: ms(this.cooldown)
 			});
-
-			/*
-				The playlists command, with multiple sub commands.
-
-				▶ **Details**
-				Usage: `/playlists`
-				Category: `Playlists`
-
-				▶ **Permissions**
-				User: `-` 
-				Bot: `Embed Links`, `Send Message`
-
-				▶ **Ratelimit**
-				You can run this command **2 times** every **10s**.
-			*/
 
 			embed.setDescription(
 				[

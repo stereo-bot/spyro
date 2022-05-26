@@ -20,6 +20,11 @@
 				"title": "Ratelimit",
 				"message": "You can run this command **{amount} time(s)** every **{duration}**."
 			}
+		},
+		"buttons": {
+			"invite": "Invite",
+			"support": "Support",
+			"website": "Website"
 		}
 	}
 }
