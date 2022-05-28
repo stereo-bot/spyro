@@ -1,5 +1,7 @@
 import { Collection, MessageAttachment, MessageEmbed, WebhookClient } from "discord.js";
 import type { Client } from "../../../";
+import { EMBED_MOD_EXTREME, EMBED_MOD_HIGH, EMBED_MOD_LOW, EMBED_MOD_MEDIUM } from "../../../constants";
+import { ModlogType } from "../../../types";
 
 interface Queue {
 	embeds: MessageEmbed[];
@@ -7,11 +9,66 @@ interface Queue {
 	guildId: string;
 }
 
+// TODO: use ModLog class instead of this, added with process data PR
+interface ModlogData {
+	member: {
+		tag: string;
+		id: string;
+	};
+	moderator: {
+		avatar: string;
+		tag: string;
+		id: string;
+	};
+	modlogType: ModlogType;
+	locale: string;
+	reason: string;
+	guildId: string;
+	case: number;
+	expire?: Date;
+}
+
 export class ModLogger {
 	public queue = new Collection<string, Queue>();
 	public timeouts = new Collection<string, NodeJS.Timeout>();
 
 	public constructor(public client: Client) {}
+
+	public onModAdd(data: ModlogData) {
+		const embed = this.client.utils.embed();
+
+		embed.setAuthor({ iconURL: data.moderator.avatar, name: `${data.moderator.tag} (${data.moderator.id})` });
+		embed.setFooter({ text: `Case #${data.case}` }).setTimestamp();
+		embed.setDescription(
+			[
+				`**Member**: \`${data.member.tag}\``,
+				`⤷ <@${data.member.id}> - ${data.member.id}`,
+				`**Action**: ${ModlogType[data.modlogType]}`,
+				data.expire ? `**Expiration**: <t:${data.expire.getTime()}:R>` : null,
+				`**Reason**: ${data.reason}`
+			]
+				.filter((str) => typeof str === "string")
+				.join("\n")
+		);
+
+		switch (data.modlogType) {
+			case ModlogType.WARN:
+				embed.setColor(EMBED_MOD_LOW);
+				break;
+			case ModlogType.MUTE:
+				embed.setColor(EMBED_MOD_MEDIUM);
+				break;
+			case ModlogType.KICK:
+			case ModlogType.SOFTBAN:
+				embed.setColor(EMBED_MOD_HIGH);
+				break;
+			case ModlogType.BAN:
+				embed.setColor(EMBED_MOD_EXTREME);
+				break;
+		}
+
+		this.sendLogs(embed, data.guildId);
+	}
 
 	public sendLogs(embed: MessageEmbed, guildId: string, attachment?: MessageAttachment) {
 		const collection = this.queue.get(guildId) || { embeds: [], attachments: [], guildId };
