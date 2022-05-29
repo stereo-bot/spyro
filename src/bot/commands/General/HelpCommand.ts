@@ -37,17 +37,16 @@ import Fuse from "fuse.js";
 })
 export default class extends Command {
 	public async autocompleteRun(interaction: AutocompleteInteraction) {
-		const input = interaction.options.getString("command", false);
-		if (!input) return;
-
 		let commands = [...this.container.stores.get("commands").values()] as Command[];
 		if (!this.client.isOwner(interaction.user.id)) commands = commands.filter((c) => !c.OwnerOnly);
-
 		const search = new Fuse(commands, {
 			keys: ["name", "description"]
 		});
-		const results = search.search(input);
 
+		const input = interaction.options.getString("command", false) ?? "";
+		if (!input) return interaction.respond(commands.map((cmd) => ({ name: this.client.utils.capitalize(cmd.name), value: cmd.name })));
+
+		const results = search.search(input);
 		await interaction.respond(results.map((res) => ({ name: this.client.utils.capitalize(res.item.name), value: res.item.name })));
 	}
 
