@@ -1,11 +1,10 @@
 {
-	"name": "bot-template",
+	"name": "spyro",
 	"version": "1.0.0",
-	"description": "Bot template for Discord bot projects made by DaanGamesDG",
+	"description": "Multi-purpose Discord bot",
 	"main": "dist/src",
-	"repository": "https://github.com/DaanGamesDG/bot-template",
 	"author": "DaanGamesDG <daan@daangamesdg.xyz>",
-	"license": "MIT",
+	"license": "Apache-2.0",
 	"devDependencies": {
 		"@commitlint/cli": "^17.0.1",
 		"@commitlint/config-angular": "^17.0.0",
