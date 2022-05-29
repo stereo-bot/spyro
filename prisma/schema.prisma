@@ -91,8 +91,7 @@ model LoggingConfig {
 }
 
 model Modlog {
-  guildId String
-  case    Int    @id
+  id String @id // guildId-caseId
 
   member    String
   moderator String

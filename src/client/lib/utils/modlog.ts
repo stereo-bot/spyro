@@ -1,8 +1,8 @@
 import type { Client } from "../../client";
 
 export const getCaseId = async (client: Client, guildId: string) => {
-	const modlogs = await client.prisma.modlog.findMany({ where: { guildId }, select: { case: true } });
-	const sorted = modlogs.sort((a, b) => a.case - b.case);
+	const modlogs = await client.prisma.modlog.findMany({ where: { id: { startsWith: guildId } }, select: { id: true } });
+	const sorted = modlogs.map((data) => Number(data.id.split("-")[1])).sort((a, b) => a - b);
 
-	return sorted[sorted.length].case + 1;
+	return `${guildId}-${sorted[sorted.length] + 1}`;
 };

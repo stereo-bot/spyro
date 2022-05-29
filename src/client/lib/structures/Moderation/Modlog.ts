@@ -5,6 +5,7 @@ import type { Modlog as iModlog } from "@prisma/client";
 import { getCaseId } from "../../utils";
 
 export class Modlog {
+	public id!: string;
 	public guild!: Guild;
 	public member!: User;
 	public moderator!: User;
@@ -27,7 +28,14 @@ export class Modlog {
 	}
 
 	public async update(data: Partial<iModlog>) {
-		const newData = await this.client.prisma.modlog.update({ where: { case: this.caseId }, data });
+		const newData = await this.client.prisma.modlog.update({ where: { id: this.id }, data });
+		await this._update(newData);
+
+		return newData;
+	}
+
+	public async delete() {
+		const newData = await this.client.prisma.modlog.delete({ where: { id: this.id } });
 		await this._update(newData);
 
 		return newData;
@@ -37,9 +45,10 @@ export class Modlog {
 	 * Only use this if you want to create a modlog from the provided data
 	 */
 	public async create(data: iModlog) {
+		const [guildId] = data.id.split("-");
 		if (this.guild) return this;
 
-		data.case = await getCaseId(this.client, data.guildId);
+		data.id = await getCaseId(this.client, guildId);
 		await this.client.prisma.modlog.create({ data });
 
 		await this._update(data);
@@ -47,8 +56,10 @@ export class Modlog {
 	}
 
 	private async _update(data: iModlog) {
-		const guild = this.client.guilds.cache.get(data.guildId);
-		const config = this.client.configManager.get(data.guildId);
+		const [guildId, caseId] = data.id.split("-");
+
+		const guild = this.client.guilds.cache.get(guildId);
+		const config = this.client.configManager.get(guildId);
 		if (!guild) throw new Error("[Modlog]: Expected a cached guild but received undefined");
 
 		let moderator = guild.members.cache.get(data.moderator)?.user;
@@ -71,6 +82,7 @@ export class Modlog {
 		this.reason = data.reason;
 		this.modlogType = data.modlogType;
 
-		this.caseId = data.case;
+		this.caseId = Number(caseId);
+		this.id = data.id;
 	}
 }
