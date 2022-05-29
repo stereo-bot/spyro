@@ -15,10 +15,12 @@ model botBlacklist {
 }
 
 model GuildConfig {
-  id             String         @id @unique
+  id             String    @id @unique
   leaveTimestamp DateTime?
-  automod        AutoModConfig? @relation("automod")
-  logging        LoggingConfig? @relation("logging")
+  locale         String    @default("en")
+
+  automod AutoModConfig? @relation("automod")
+  logging LoggingConfig? @relation("logging")
 }
 
 model AutoModConfig {
@@ -76,7 +78,6 @@ model AutoModConfig {
 model LoggingConfig {
   guildId String      @unique
   guild   GuildConfig @relation("logging", fields: [guildId], references: [id])
-  locale  String      @default("en")
 
   moduleEnabled Boolean @default(false)
 
