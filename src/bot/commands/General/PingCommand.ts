@@ -13,7 +13,7 @@ import type { CommandInteraction, Message } from "discord.js";
 })
 export default class extends Command {
 	public async messageRun(message: Message): Promise<void> {
-		const locale = message.guild?.preferredLocale || "en";
+		const { locale } = this.client.configManager.get(message?.guildId ?? "");
 		const msg = await message.reply(this.getTranslations("loading", locale));
 		await msg.edit(
 			this.getTranslations("response", locale, { heartbeat: this.client.ws.ping, roundtrip: msg.createdTimestamp - message.createdTimestamp })

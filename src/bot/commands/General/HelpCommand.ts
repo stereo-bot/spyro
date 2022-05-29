@@ -51,7 +51,7 @@ export default class extends Command {
 	}
 
 	public async messageRun(message: Message, args: Command.Args): Promise<void> {
-		const locale = message.guild?.preferredLocale || "en";
+		const { locale } = this.client.configManager.get(message?.guildId ?? "");
 		const cmd = await args.pickResult("string");
 		const command = this.container.stores.get("commands").get(cmd.value ?? "") as Command | undefined;
 
