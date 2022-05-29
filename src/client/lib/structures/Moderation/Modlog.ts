@@ -2,6 +2,7 @@ import type { Guild, User } from "discord.js";
 import type { Client } from "../../../client";
 import type { ModlogType } from "../../../types";
 import type { Modlog as iModlog } from "@prisma/client";
+import { getCaseId } from "../../utils";
 
 export class Modlog {
 	public guild!: Guild;
@@ -17,8 +18,8 @@ export class Modlog {
 	public reason!: string;
 	public modlogType!: ModlogType;
 
-	public constructor(public client: Client, data: iModlog) {
-		void this._update(data);
+	public constructor(public client: Client, data?: iModlog) {
+		if (data) void this._update(data);
 	}
 
 	public toString(): string {
@@ -30,6 +31,19 @@ export class Modlog {
 		await this._update(newData);
 
 		return newData;
+	}
+
+	/**
+	 * Only use this if you want to create a modlog from the provided data
+	 */
+	public async create(data: iModlog) {
+		if (this.guild) return this;
+
+		data.case = await getCaseId(this.client, data.guildId);
+		await this.client.prisma.modlog.create({ data });
+
+		await this._update(data);
+		return this;
 	}
 
 	private async _update(data: iModlog) {
