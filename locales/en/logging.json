@@ -20,17 +20,21 @@
 	},
 	"mod": {
 		"no_reason": "No reason provided. Run `/reason {id} <reason>` to add one.",
+		"footer": "Case #{caseId}",
 		"add": {
 			"description_member": "**Member**: {member}",
 			"description_action": "**Action**: {action}",
 			"description_expire": "**Expiration**: {expire}",
-			"description_reason": "**Reason**: {reason}",
-			"footer": "Case #{caseId}"
+			"description_reason": "**Reason**: {reason}"
 		},
 		"remove": {
 			"description_member": "**Member**: {member}",
-			"description_reason": "**Action**: Modlog removed from system.",
-			"footer": "Case #{caseId}"
+			"description_reason": "**Action**: Modlog removed from system."
+		},
+		"end": {
+			"description_member": "**Member**: {member}",
+			"description_action": "**Action**: {action}",
+			"description_date": "**Original Action Taken**: {date}"
 		}
 	}
 }

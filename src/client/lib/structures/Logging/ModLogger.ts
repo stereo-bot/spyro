@@ -1,7 +1,7 @@
 import { Collection, MessageAttachment, MessageEmbed, WebhookClient } from "discord.js";
 import moment from "moment";
 import type { Client } from "../../../";
-import { EMBED_BLANK, EMBED_MOD_EXTREME, EMBED_MOD_HIGH, EMBED_MOD_LOW, EMBED_MOD_MEDIUM } from "../../../constants";
+import { EMBED_BLANK, EMBED_MOD_EXTREME, EMBED_MOD_HIGH, EMBED_MOD_LOW, EMBED_MOD_MEDIUM, EMBED_SUCCESS } from "../../../constants";
 import { ModlogType } from "../../../types";
 
 interface Queue {
@@ -86,6 +86,27 @@ export class ModLogger {
 				this.t(data.locale, `${basePath}.description_member`, { member: `\`${data.member.tag}\`` }),
 				`⤷ <@${data.member.id}> - ${data.member.id}`,
 				this.t(data.locale, `${basePath}.description_reason`)
+			]
+				.filter((str) => typeof str === "string")
+				.join("\n")
+		);
+
+		this.sendLogs(embed, data.guildId);
+	}
+
+	public onModEnd(data: ModlogData) {
+		const embed = this.client.utils.embed();
+		const basePath = "logging:mod.end";
+
+		embed.setColor(EMBED_SUCCESS);
+		embed.setAuthor({ iconURL: data.moderator.avatar, name: `${data.moderator.tag} (${data.moderator.id})` });
+		embed.setFooter({ text: `Case #${data.case}` }).setTimestamp();
+		embed.setDescription(
+			[
+				this.t(data.locale, `${basePath}.description_member`, { member: `\`${data.member.tag}\`` }),
+				`⤷ <@${data.member.id}> - ${data.member.id}`,
+				this.t(data.locale, `${basePath}.description_action`, { action: this.t(data.locale, `common:mod_actions_end.${data.modlogType}`) }),
+				this.t(data.locale, `${basePath}.description_date`, { date: `<t:${moment(data.date).unix()}:R>` })
 			]
 				.filter((str) => typeof str === "string")
 				.join("\n")
