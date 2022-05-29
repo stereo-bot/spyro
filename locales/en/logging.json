@@ -17,5 +17,15 @@
 			"before_title": "Message before update",
 			"after_title": "Message after update"
 		}
+	},
+	"mod": {
+		"no_reason": "No reason provided. Run `/reason {id} <reason>` to add one.",
+		"add": {
+			"description_member": "**Member**: {member}",
+			"description_action": "**Action**: {action}",
+			"description_expire": "**Expiration**: {expire}",
+			"description_reason": "**Reason**: {reason}",
+			"footer": "Case #{caseId}"
+		}
 	}
 }

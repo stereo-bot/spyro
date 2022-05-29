@@ -1,3 +1,10 @@
 {
-	"loading": "loading"
+	"loading": "loading",
+	"mod_actions": {
+		"0": "warn",
+		"1": "mute",
+		"2": "kick",
+		"3": "softban",
+		"4": "ban"
+	}
 }

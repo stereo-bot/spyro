@@ -36,16 +36,17 @@ export class ModLogger {
 
 	public onModAdd(data: ModlogData) {
 		const embed = this.client.utils.embed();
+		const basePath = "logging:mod.add";
 
 		embed.setAuthor({ iconURL: data.moderator.avatar, name: `${data.moderator.tag} (${data.moderator.id})` });
 		embed.setFooter({ text: `Case #${data.case}` }).setTimestamp();
 		embed.setDescription(
 			[
-				`**Member**: \`${data.member.tag}\``,
+				this.t(data.locale, `${basePath}.description_member`, { member: data.member.tag }),
 				`⤷ <@${data.member.id}> - ${data.member.id}`,
-				`**Action**: ${ModlogType[data.modlogType]}`,
-				data.expire ? `**Expiration**: <t:${data.expire.getTime()}:R>` : null,
-				`**Reason**: ${data.reason}`
+				this.t(data.locale, `${basePath}.description_action`, { action: this.t(data.locale, `common:mod_actions.${data.modlogType}`) }),
+				data.expire ? this.t(data.locale, `${basePath}.description_expire`, { expire: `<t:${data.expire.getTime()}:R>` }) : null,
+				this.t(data.locale, `${basePath}.description_reason`, { reason: data.reason })
 			]
 				.filter((str) => typeof str === "string")
 				.join("\n")
