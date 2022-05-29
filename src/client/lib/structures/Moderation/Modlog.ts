@@ -38,6 +38,8 @@ export class Modlog {
 		const newData = await this.client.prisma.modlog.delete({ where: { id: this.id } });
 		await this._update(newData);
 
+		this.client.modLogger.onModRemove(this);
+
 		return newData;
 	}
 
