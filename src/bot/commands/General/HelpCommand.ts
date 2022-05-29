@@ -44,8 +44,9 @@ export default class extends Command {
 		});
 
 		const input = interaction.options.getString("command", false) ?? "";
-		const results = search.search(input);
+		if (!input) return interaction.respond(commands.map((cmd) => ({ name: this.client.utils.capitalize(cmd.name), value: cmd.name })));
 
+		const results = search.search(input);
 		await interaction.respond(results.map((res) => ({ name: this.client.utils.capitalize(res.item.name), value: res.item.name })));
 	}
 
