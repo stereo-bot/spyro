@@ -42,7 +42,7 @@ export class ModLogger {
 		embed.setFooter({ text: `Case #${data.case}` }).setTimestamp();
 		embed.setDescription(
 			[
-				this.t(data.locale, `${basePath}.description_member`, { member: data.member.tag }),
+				this.t(data.locale, `${basePath}.description_member`, { member: `\`${data.member.tag}\`` }),
 				`⤷ <@${data.member.id}> - ${data.member.id}`,
 				this.t(data.locale, `${basePath}.description_action`, { action: this.t(data.locale, `common:mod_actions.${data.modlogType}`) }),
 				data.expire ? this.t(data.locale, `${basePath}.description_expire`, { expire: `<t:${data.expire.getTime()}:R>` }) : null,
