@@ -1,4 +1,5 @@
 import { Collection, MessageAttachment, MessageEmbed, WebhookClient } from "discord.js";
+import moment from "moment";
 import type { Client } from "../../../";
 import { EMBED_MOD_EXTREME, EMBED_MOD_HIGH, EMBED_MOD_LOW, EMBED_MOD_MEDIUM } from "../../../constants";
 import { ModlogType } from "../../../types";
@@ -45,7 +46,7 @@ export class ModLogger {
 				this.t(data.locale, `${basePath}.description_member`, { member: `\`${data.member.tag}\`` }),
 				`⤷ <@${data.member.id}> - ${data.member.id}`,
 				this.t(data.locale, `${basePath}.description_action`, { action: this.t(data.locale, `common:mod_actions.${data.modlogType}`) }),
-				data.expire ? this.t(data.locale, `${basePath}.description_expire`, { expire: `<t:${data.expire.getTime()}:R>` }) : null,
+				data.expire ? this.t(data.locale, `${basePath}.description_expire`, { expire: `<t:${moment(data.expire).unix()}:R>` }) : null,
 				this.t(data.locale, `${basePath}.description_reason`, { reason: data.reason })
 			]
 				.filter((str) => typeof str === "string")
