@@ -61,7 +61,7 @@ export class AutoMod {
 		let invite: Invite | null = null;
 		for await (const inviteLink of invites) {
 			invite = await this.client.fetchInvite(inviteLink).catch(() => null);
-			if (invite) break;
+			if (invite && invite.guild?.id !== message.guildId) break;
 		}
 
 		if (!invite) return null;
