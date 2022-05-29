@@ -2,7 +2,7 @@ import { SapphireClient } from "@sapphire/framework";
 import type { ActivitiesOptions, BitFieldResolvable, IntentsString, PartialTypes, PresenceStatusData } from "discord.js";
 import { join } from "path";
 import { PrismaClient } from "@prisma/client";
-import { AutoMod, BlacklistManager, Utils, ServiceHandler, ConfigManager, LocaleManager, MessageLogger } from "./lib";
+import { AutoMod, BlacklistManager, Utils, ServiceHandler, ConfigManager, LocaleManager, MessageLogger, ModLogger } from "./lib";
 
 import "@daangamesdg/sapphire-logger/register";
 
@@ -24,6 +24,7 @@ export class Client extends SapphireClient {
 
 	// logging
 	public messageLogger: MessageLogger = new MessageLogger(this);
+	public modLogger: ModLogger = new ModLogger(this);
 
 	public constructor(options: ClientOptions) {
 		super({
