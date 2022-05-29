@@ -54,7 +54,8 @@ const getMockConfig = (id: string): FullGuildConfig => ({
 		modWebhook: null
 	},
 	id,
-	leaveTimestamp: null
+	leaveTimestamp: null,
+	locale: "en"
 });
 
 interface ConfigTimeout {

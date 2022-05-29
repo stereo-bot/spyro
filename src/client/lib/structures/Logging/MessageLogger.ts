@@ -18,7 +18,7 @@ export class MessageLogger {
 
 	public onMessageDelete(message: GuildMessage) {
 		if (message.author.bot || message.webhookId) return;
-		const locale = message.guild.preferredLocale;
+		const { locale } = this.client.configManager.get(message.guildId);
 
 		const embed = this.client.utils
 			.embed()
@@ -44,7 +44,7 @@ export class MessageLogger {
 
 	public onMessageUpdate(messageOld: GuildMessage, messageNew: GuildMessage) {
 		if (messageOld.content === messageNew.content || messageNew.author.bot || messageNew.webhookId) return;
-		const locale = messageNew.guild.preferredLocale;
+		const { locale } = this.client.configManager.get(messageNew.guildId);
 
 		const embed = this.client.utils
 			.embed()
@@ -83,7 +83,7 @@ export class MessageLogger {
 		if (!messages.size) return;
 
 		const message = messages.first()!;
-		const locale = message.guild.preferredLocale;
+		const { locale } = this.client.configManager.get(message.guildId);
 		const embed = this.client.utils.embed().setColor(EMBED_DANGER);
 
 		const title = this.t(locale, "logging:message.delete_bulk.title", {
