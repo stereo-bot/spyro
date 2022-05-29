@@ -26,6 +26,11 @@
 			"description_expire": "**Expiration**: {expire}",
 			"description_reason": "**Reason**: {reason}",
 			"footer": "Case #{caseId}"
+		},
+		"remove": {
+			"description_member": "**Member**: {member}",
+			"description_reason": "**Action**: Modlog removed from system.",
+			"footer": "Case #{caseId}"
 		}
 	}
 }

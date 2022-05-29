@@ -6,5 +6,9 @@
 		"2": "kick",
 		"3": "softban",
 		"4": "ban"
+	},
+	"mod_actions_end": {
+		"1": "unmute",
+		"4": "unban"
 	}
 }

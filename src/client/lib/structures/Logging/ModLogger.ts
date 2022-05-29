@@ -1,7 +1,7 @@
 import { Collection, MessageAttachment, MessageEmbed, WebhookClient } from "discord.js";
 import moment from "moment";
 import type { Client } from "../../../";
-import { EMBED_MOD_EXTREME, EMBED_MOD_HIGH, EMBED_MOD_LOW, EMBED_MOD_MEDIUM } from "../../../constants";
+import { EMBED_BLANK, EMBED_MOD_EXTREME, EMBED_MOD_HIGH, EMBED_MOD_LOW, EMBED_MOD_MEDIUM } from "../../../constants";
 import { ModlogType } from "../../../types";
 
 interface Queue {
@@ -26,7 +26,9 @@ interface ModlogData {
 	reason: string;
 	guildId: string;
 	case: number;
+
 	expire?: Date;
+	date: Date;
 }
 
 export class ModLogger {
@@ -68,6 +70,26 @@ export class ModLogger {
 				embed.setColor(EMBED_MOD_EXTREME);
 				break;
 		}
+
+		this.sendLogs(embed, data.guildId);
+	}
+
+	public onModRemove(data: ModlogData) {
+		const embed = this.client.utils.embed();
+		const basePath = "logging:mod.remove";
+
+		embed.setColor(EMBED_BLANK);
+		embed.setAuthor({ iconURL: data.moderator.avatar, name: `${data.moderator.tag} (${data.moderator.id})` });
+		embed.setFooter({ text: `Case #${data.case}` }).setTimestamp();
+		embed.setDescription(
+			[
+				this.t(data.locale, `${basePath}.description_member`, { member: `\`${data.member.tag}\`` }),
+				`⤷ <@${data.member.id}> - ${data.member.id}`,
+				this.t(data.locale, `${basePath}.description_reason`)
+			]
+				.filter((str) => typeof str === "string")
+				.join("\n")
+		);
 
 		this.sendLogs(embed, data.guildId);
 	}
