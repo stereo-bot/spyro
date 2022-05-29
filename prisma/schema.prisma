@@ -90,6 +90,20 @@ model LoggingConfig {
   modWebhook String?
 }
 
+model Modlog {
+  guildId String
+  case    Int    @id
+
+  member    String
+  moderator String
+
+  modlogType Int
+  reason     String
+
+  expire DateTime?
+  date   DateTime
+}
+
 enum ModerationAction {
   VERBAL
   WARN

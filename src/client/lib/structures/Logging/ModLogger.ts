@@ -3,32 +3,12 @@ import moment from "moment";
 import type { Client } from "../../../";
 import { EMBED_BLANK, EMBED_MOD_EXTREME, EMBED_MOD_HIGH, EMBED_MOD_LOW, EMBED_MOD_MEDIUM, EMBED_SUCCESS } from "../../../constants";
 import { ModlogType } from "../../../types";
+import type { Modlog } from "../Moderation/Modlog";
 
 interface Queue {
 	embeds: MessageEmbed[];
 	attachments: MessageAttachment[];
 	guildId: string;
-}
-
-// TODO: use ModLog class instead of this, added with process data PR
-interface ModlogData {
-	member: {
-		tag: string;
-		id: string;
-	};
-	moderator: {
-		avatar: string;
-		tag: string;
-		id: string;
-	};
-	modlogType: ModlogType;
-	locale: string;
-	reason: string;
-	guildId: string;
-	case: number;
-
-	expire?: Date;
-	date: Date;
 }
 
 export class ModLogger {
@@ -37,12 +17,15 @@ export class ModLogger {
 
 	public constructor(public client: Client) {}
 
-	public onModAdd(data: ModlogData) {
+	public onModAdd(data: Modlog) {
 		const embed = this.client.utils.embed();
 		const basePath = "logging:mod.add";
 
-		embed.setAuthor({ iconURL: data.moderator.avatar, name: `${data.moderator.tag} (${data.moderator.id})` });
-		embed.setFooter({ text: `Case #${data.case}` }).setTimestamp();
+		embed.setAuthor({
+			iconURL: data.moderator.displayAvatarURL({ dynamic: true, size: 32 }),
+			name: `${data.moderator.tag} (${data.moderator.id})`
+		});
+		embed.setFooter({ text: `Case #${data.caseId}` }).setTimestamp();
 		embed.setDescription(
 			[
 				this.t(data.locale, `${basePath}.description_member`, { member: `\`${data.member.tag}\`` }),
@@ -71,16 +54,19 @@ export class ModLogger {
 				break;
 		}
 
-		this.sendLogs(embed, data.guildId);
+		this.sendLogs(embed, data.guild.id);
 	}
 
-	public onModRemove(data: ModlogData) {
+	public onModRemove(data: Modlog) {
 		const embed = this.client.utils.embed();
 		const basePath = "logging:mod.remove";
 
 		embed.setColor(EMBED_BLANK);
-		embed.setAuthor({ iconURL: data.moderator.avatar, name: `${data.moderator.tag} (${data.moderator.id})` });
-		embed.setFooter({ text: `Case #${data.case}` }).setTimestamp();
+		embed.setAuthor({
+			iconURL: data.moderator.displayAvatarURL({ dynamic: true, size: 32 }),
+			name: `${data.moderator.tag} (${data.moderator.id})`
+		});
+		embed.setFooter({ text: `Case #${data.caseId}` }).setTimestamp();
 		embed.setDescription(
 			[
 				this.t(data.locale, `${basePath}.description_member`, { member: `\`${data.member.tag}\`` }),
@@ -91,16 +77,19 @@ export class ModLogger {
 				.join("\n")
 		);
 
-		this.sendLogs(embed, data.guildId);
+		this.sendLogs(embed, data.guild.id);
 	}
 
-	public onModEnd(data: ModlogData) {
+	public onModEnd(data: Modlog) {
 		const embed = this.client.utils.embed();
 		const basePath = "logging:mod.end";
 
 		embed.setColor(EMBED_SUCCESS);
-		embed.setAuthor({ iconURL: data.moderator.avatar, name: `${data.moderator.tag} (${data.moderator.id})` });
-		embed.setFooter({ text: `Case #${data.case}` }).setTimestamp();
+		embed.setAuthor({
+			iconURL: data.moderator.displayAvatarURL({ dynamic: true, size: 32 }),
+			name: `${data.moderator.tag} (${data.moderator.id})`
+		});
+		embed.setFooter({ text: `Case #${data.caseId}` }).setTimestamp();
 		embed.setDescription(
 			[
 				this.t(data.locale, `${basePath}.description_member`, { member: `\`${data.member.tag}\`` }),
@@ -112,7 +101,7 @@ export class ModLogger {
 				.join("\n")
 		);
 
-		this.sendLogs(embed, data.guildId);
+		this.sendLogs(embed, data.guild.id);
 	}
 
 	public sendLogs(embed: MessageEmbed, guildId: string, attachment?: MessageAttachment) {
