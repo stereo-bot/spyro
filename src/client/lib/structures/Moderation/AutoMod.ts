@@ -75,6 +75,7 @@ export class AutoMod {
 			user: message.author.id,
 			date: Date.now(),
 			key: "AUTOMOD_INVITE",
+			message,
 			vars: {
 				code: invite.code,
 				channel: message.channel.toString(),
@@ -102,6 +103,7 @@ export class AutoMod {
 					guild: message.guildId,
 					user: message.author.id,
 					date: Date.now(),
+					message,
 					key: "AUTOMOD_DUP_TEXT"
 				};
 		} else {
@@ -124,6 +126,7 @@ export class AutoMod {
 				guild: message.guildId,
 				user: message.author.id,
 				date: Date.now(),
+				message,
 				key: "AUTOMOD_PHISHING"
 			};
 
@@ -136,6 +139,7 @@ export class AutoMod {
 				guild: message.guildId,
 				user: message.author.id,
 				date: Date.now(),
+				message,
 				key: "AUTOMOD_ZALGO"
 			};
 
@@ -168,6 +172,7 @@ export class AutoMod {
 						user: message.author.id,
 						date: Date.now(),
 						key: "AUTOMOD_SPAM",
+						message,
 						vars: options
 					};
 				}
@@ -216,6 +221,7 @@ export class AutoMod {
 						user: message.author.id,
 						date: Date.now(),
 						key: "AUTOMOD_MENTION",
+						message,
 						vars: options
 					};
 				}
@@ -260,6 +266,7 @@ export class AutoMod {
 			user: message.author.id,
 			date: Date.now(),
 			key: "AUTOMOD_BAD_WORDS",
+			message,
 			vars: {
 				words
 			}

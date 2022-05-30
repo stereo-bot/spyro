@@ -13,6 +13,7 @@ export interface AutoModResults {
 	date: number;
 	key: string;
 	vars?: Record<string, any>;
+	message: GuildMessage;
 }
 
 export interface AutoModCacheDupData {
