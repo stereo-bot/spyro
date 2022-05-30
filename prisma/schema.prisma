@@ -107,5 +107,7 @@ enum ModerationAction {
   VERBAL
   WARN
   MUTE
+  KICK
+  SOFTBAN
   BAN
 }
