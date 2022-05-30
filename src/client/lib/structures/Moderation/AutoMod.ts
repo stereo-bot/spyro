@@ -148,7 +148,7 @@ export class AutoMod {
 
 	public spam(message: GuildMessage, options: AutomodXFilterOptions): AutoModResults | null {
 		if (this.spamCache.has(`${message.author.id}-${message.guild.id}`)) {
-			const { lastMessage, timer, count } = this.spamCache.get(`${message.author.id}-${message.guild.id}`)!;
+			const { lastMessage, timer, count, messages } = this.spamCache.get(`${message.author.id}-${message.guild.id}`)!;
 			const difference = message.createdTimestamp - lastMessage.createdTimestamp;
 			let messageCount: number = count;
 
@@ -157,6 +157,7 @@ export class AutoMod {
 				this.spamCache.set(`${message.author.id}-${message.guild.id}`, {
 					count: 1,
 					lastMessage: message,
+					messages: [...messages, message],
 					timer: setTimeout(() => this.spamCache.delete(`${message.author.id}-${message.guild.id}`), options.duration)
 				});
 			} else {
@@ -164,6 +165,7 @@ export class AutoMod {
 				if (messageCount >= options.amount) {
 					this.spamCache.set(`${message.author.id}-${message.guild.id}`, {
 						lastMessage: message,
+						messages: [],
 						count: 1,
 						timer
 					});
@@ -176,8 +178,10 @@ export class AutoMod {
 						vars: options
 					};
 				}
+
 				this.spamCache.set(`${message.author.id}-${message.guild.id}`, {
 					lastMessage: message,
+					messages: [...messages, message],
 					count: messageCount,
 					timer
 				});
@@ -187,6 +191,7 @@ export class AutoMod {
 			this.spamCache.set(`${message.author.id}-${message.guild.id}`, {
 				count: 1,
 				lastMessage: message,
+				messages: [],
 				timer: fn
 			});
 		}
@@ -196,7 +201,7 @@ export class AutoMod {
 
 	public mention(message: GuildMessage, options: AutomodXFilterOptions): AutoModResults | null {
 		if (this.mentionCache.has(`${message.author.id}-${message.guild.id}`)) {
-			const { lastMessage, timer, count } = this.mentionCache.get(`${message.author.id}-${message.guild.id}`)!;
+			const { lastMessage, timer, count, messages } = this.mentionCache.get(`${message.author.id}-${message.guild.id}`)!;
 			const difference = message.createdTimestamp - lastMessage.createdTimestamp;
 			let mentionCount: number = count;
 
@@ -205,6 +210,7 @@ export class AutoMod {
 				this.mentionCache.set(`${message.author.id}-${message.guild.id}`, {
 					count: 1,
 					lastMessage: message,
+					messages: [...messages, message],
 					timer: setTimeout(() => this.mentionCache.delete(`${message.author.id}-${message.guild.id}`), options.duration)
 				});
 			} else {
@@ -213,6 +219,7 @@ export class AutoMod {
 				if (mentionCount >= options.amount) {
 					this.mentionCache.set(`${message.author.id}-${message.guild.id}`, {
 						lastMessage: message,
+						messages: [],
 						count: 1,
 						timer
 					});
@@ -228,6 +235,7 @@ export class AutoMod {
 				this.mentionCache.set(`${message.author.id}-${message.guild.id}`, {
 					lastMessage: message,
 					count: mentionCount,
+					messages: [...messages, message],
 					timer
 				});
 			}
@@ -237,6 +245,7 @@ export class AutoMod {
 			this.mentionCache.set(`${message.author.id}-${message.guild.id}`, {
 				count: message.mentions.members?.filter((m) => !m.user.bot && m.id !== message.author.id).size ?? 0,
 				lastMessage: message,
+				messages: [],
 				timer: fn
 			});
 		}

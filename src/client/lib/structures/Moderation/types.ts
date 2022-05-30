@@ -27,6 +27,7 @@ export interface AutoModXFilter {
 	count: number;
 	lastMessage: Message;
 	timer: NodeJS.Timeout;
+	messages: GuildMessage[];
 }
 
 export interface AutomodInviteOptions {
