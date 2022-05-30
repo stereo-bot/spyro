@@ -5,6 +5,7 @@ import { Modlog } from "./Modlog";
 import { getCaseId } from "../../utils";
 import ms from "ms";
 import { ModlogType } from "../../../types";
+import type { GuildMessage } from "./";
 import type { GuildMember } from "discord.js";
 
 export class ModAction {
@@ -49,9 +50,33 @@ export class ModAction {
 					case ModlogType.MUTE:
 						await this.mute(modlog, duration);
 						break;
+					case ModlogType.KICK:
+						await this.kick(modlog);
+						break;
+					case ModlogType.SOFTBAN:
+						await this.softban(modlog);
+						break;
+					case ModlogType.BAN:
+						await this.ban(modlog);
+						break;
 					default:
 						break;
 				}
+			}
+
+			try {
+				await res.message.reply(config.response); // Respond to violation in chat
+			} catch (err) {
+				try {
+					await res.message.channel.send(`<@${res.user}>, ${config.response}`); // Try sending it in the channel instead
+				} catch (e) {} // ignore the error
+			}
+
+			if (config.deleteMessage) {
+				if (res.vars?.messages) {
+					const messages = res.vars?.messages as GuildMessage[];
+					res.message.channel.bulkDelete(messages).catch(() => void 0); // delete spam/mention messages
+				} else await res.message.delete().catch(() => void 0); // delete normal message
 			}
 		});
 	}
@@ -231,27 +256,32 @@ export class ModAction {
 		let action: ModerationAction;
 		let deleteMessage: boolean;
 		let reason: string;
+		let response: string;
 
 		switch (data.key) {
 			case "AUTOMOD_INVITE":
 				action = config.automod.inviteAction;
 				deleteMessage = config.automod.inviteDelete;
 				reason = this.t(config.locale, "moderation:automod_reasons.invite", data.vars);
+				response = this.t(config.locale, "moderation:automod_responses.invite");
 				break;
 			case "AUTOMOD_DUP_TEXT":
 				action = config.automod.DupTextAction;
 				deleteMessage = config.automod.DupTextDelete;
 				reason = this.t(config.locale, "moderation:automod_reasons.duplicate", data.vars);
+				response = this.t(config.locale, "moderation:automod_responses.duplicate");
 				break;
 			case "AUTOMOD_PHISHING":
 				action = config.automod.PhishingAction;
 				deleteMessage = config.automod.PhishingDelete;
 				reason = this.t(config.locale, "moderation:automod_reasons.phishing", data.vars);
+				response = this.t(config.locale, "moderation:automod_responses.phishing");
 				break;
 			case "AUTOMOD_ZALGO":
 				action = config.automod.ZalgoAction;
 				deleteMessage = config.automod.ZalgoDelete;
 				reason = this.t(config.locale, "moderation:automod_reasons.zalgo", data.vars);
+				response = this.t(config.locale, "moderation:automod_responses.zalgo");
 				break;
 			case "AUTOMOD_SPAM":
 				{
@@ -260,6 +290,7 @@ export class ModAction {
 
 					const vars = { ...data.vars, duration: ms(data.vars?.duration ?? 0) };
 					reason = this.t(config.locale, "moderation:automod_reasons.spam", vars);
+					response = this.t(config.locale, "moderation:automod_responses.spam");
 				}
 				break;
 			case "AUTOMOD_MENTION":
@@ -269,18 +300,21 @@ export class ModAction {
 
 					const vars = { ...data.vars, duration: ms(data.vars?.duration ?? 0) };
 					reason = this.t(config.locale, "moderation:automod_reasons.mention", vars);
+					response = this.t(config.locale, "moderation:automod_responses.mention");
 				}
 				break;
 			default:
 				action = ModerationAction.VERBAL;
 				deleteMessage = true;
 				reason = this.t(config.locale, "logging:mod.no_reason");
+				response = "[AUTOMOD]: Response";
 				break;
 		}
 
 		return {
 			action,
 			reason,
+			response,
 			deleteMessage
 		};
 	}

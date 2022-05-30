@@ -175,7 +175,7 @@ export class AutoMod {
 						date: Date.now(),
 						key: "AUTOMOD_SPAM",
 						message,
-						vars: options
+						vars: { ...options, messages }
 					};
 				}
 
@@ -229,7 +229,7 @@ export class AutoMod {
 						date: Date.now(),
 						key: "AUTOMOD_MENTION",
 						message,
-						vars: options
+						vars: { ...options, messages }
 					};
 				}
 				this.mentionCache.set(`${message.author.id}-${message.guild.id}`, {
