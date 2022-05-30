@@ -66,10 +66,10 @@ export class ModAction {
 			}
 
 			try {
-				await res.message.reply(config.response); // Respond to violation in chat
+				await res.message.reply({ content: config.response, allowedMentions: { repliedUser: true } }); // Respond to violation in chat
 			} catch (err) {
 				try {
-					await res.message.channel.send(`<@${res.user}>, ${config.response}`); // Try sending it in the channel instead
+					await res.message.channel.send({ content: `<@${res.user}>, ${config.response}`, allowedMentions: { users: [res.user] } }); // Try sending it in the channel instead
 				} catch (e) {} // ignore the error
 			}
 
