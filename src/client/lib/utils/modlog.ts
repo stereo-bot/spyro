@@ -5,5 +5,5 @@ export const getCaseId = async (client: Client, guildId: string) => {
 	if (!modlogs.length) return `${guildId}-1`;
 
 	const sorted = modlogs.map((data) => Number(data.id.split("-")[1])).sort((a, b) => a - b);
-	return `${guildId}-${sorted[sorted.length] + 1}`;
+	return `${guildId}-${sorted[sorted.length - 1] + 1}`;
 };
