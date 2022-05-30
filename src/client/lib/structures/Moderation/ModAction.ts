@@ -7,6 +7,7 @@ import ms from "ms";
 import { ModlogType } from "../../../types";
 import type { GuildMessage } from "./";
 import type { GuildMember } from "discord.js";
+import moment from "moment";
 
 export class ModAction {
 	public constructor(public client: Client) {}
@@ -26,8 +27,8 @@ export class ModAction {
 
 				const addExpire = modlogType === ModlogType.MUTE || modlogType === ModlogType.BAN;
 				if (addExpire) {
-					expire = new Date(date.getMilliseconds() + guildConfig.automod[modlogType === ModlogType.MUTE ? "MuteDuration" : "BanDuration"]);
-					duration = guildConfig.automod[modlogType === ModlogType.MUTE ? "MuteDuration" : "BanDuration"];
+					duration = guildConfig.automod[modlogType === ModlogType.MUTE ? "MuteDuration" : "BanDuration"] * 1e3;
+					expire = moment(date).add(duration).toDate();
 				}
 
 				const data = {
