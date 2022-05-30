@@ -7,6 +7,7 @@ const getMockConfig = (id: string): FullGuildConfig => ({
 		guildId: id,
 		moduleEnabled: false,
 		MuteDuration: 6e2,
+		BanDuration: 864e2,
 		globalWhitelist: [],
 		inviteEnabled: true,
 		inviteDelete: true,
