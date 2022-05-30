@@ -29,6 +29,7 @@ model AutoModConfig {
 
   moduleEnabled   Boolean  @default(false)
   MuteDuration    Int      @default(600) // duration in seconds (max 24 hours)
+  BanDuration     Int      @default(86400) // duration in seconds (max 30 days)
   globalWhitelist String[]
 
 
