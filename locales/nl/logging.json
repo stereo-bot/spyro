@@ -1,0 +1,40 @@
+{
+	"message": {
+		"no_content": "No message content",
+		"delete": {
+			"title": "Message deleted in {channel}",
+			"footer": "Message deleted"
+		},
+		"delete_bulk": {
+			"title": "Messages deleted in {channel}",
+			"footer": "Messages deleted",
+			"description": "[Go to channel]({channel_link}) - You can find the deleted message contents in the attachment."
+		},
+		"update": {
+			"title": "Message updated in {channel}",
+			"footer": "Message updated",
+			"description": "[Jump to message]({message_link}) - [Go to channel]({channel_link})",
+			"before_title": "Message before update",
+			"after_title": "Message after update"
+		}
+	},
+	"mod": {
+		"no_reason": "No reason provided. Run `/reason {id} <reason>` to add one.",
+		"footer": "Case #{caseId}",
+		"add": {
+			"description_member": "**Member**: {member}",
+			"description_action": "**Action**: {action}",
+			"description_expire": "**Expiration**: {expire}",
+			"description_reason": "**Reason**: {reason}"
+		},
+		"remove": {
+			"description_member": "**Member**: {member}",
+			"description_reason": "**Action**: Modlog removed from system."
+		},
+		"end": {
+			"description_member": "**Member**: {member}",
+			"description_action": "**Action**: {action}",
+			"description_date": "**Original Action Taken**: {date}"
+		}
+	}
+}

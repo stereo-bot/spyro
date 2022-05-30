@@ -1,0 +1,18 @@
+{
+	"user_dm": {
+		"warn": "You were warned in **{guild}** with the reason: {reason}",
+		"mute": "You were muted in **{guild}** for `{duration}` with the reason: {reason}",
+		"kick": "You were kicked from **{guild}** with the reason: {reason}",
+		"softban": "You were softbanned from **{guild}** with the reason: {reason}. This is not a permanent ban, only a kick that also removes all your messages.",
+		"tempban": "You were banned from **{guild}** for `{duration}` with the reason: {reason}",
+		"ban": "You were banned from **{guild}** with the reason: {reason}"
+	},
+	"automod_reasons": {
+		"invite": "Automatic action carried out for posting an invite link to **{target}** in {channel}: `.gg/{code}`.",
+		"duplicate": "Automatic action carried out for posting duplicate messages.",
+		"phishing": "Automatic action carried out for posting a possible phising link.",
+		"zalgo": "Automatic action carried out for posting a message with zalgo text.",
+		"spam": "Automatic action carried out for hitting the message rate limit ({amount}/{duration}).",
+		"mention": "Automatic action carried out for hitting the mention rate limit ({amount}/{duration})."
+	}
+}
