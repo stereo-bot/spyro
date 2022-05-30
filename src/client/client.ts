@@ -2,7 +2,7 @@ import { SapphireClient } from "@sapphire/framework";
 import type { ActivitiesOptions, BitFieldResolvable, IntentsString, PartialTypes, PresenceStatusData } from "discord.js";
 import { join } from "path";
 import { PrismaClient } from "@prisma/client";
-import { AutoMod, BlacklistManager, Utils, ServiceHandler, ConfigManager, LocaleManager, MessageLogger, ModLogger } from "./lib";
+import { AutoMod, BlacklistManager, Utils, ServiceHandler, ConfigManager, LocaleManager, MessageLogger, ModLogger, ModAction } from "./lib";
 
 import "@daangamesdg/sapphire-logger/register";
 
@@ -12,7 +12,10 @@ export class Client extends SapphireClient {
 	// Classes
 	public prisma = new PrismaClient();
 	public utils: Utils = new Utils(this);
+
+	// Moderation
 	public automod: AutoMod = new AutoMod(this);
+	public modaction: ModAction = new ModAction(this);
 
 	// ServiceHandler
 	public serviceHandler: ServiceHandler = new ServiceHandler(this);

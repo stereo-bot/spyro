@@ -4,6 +4,7 @@ import { INVITE_REGEX, ZALGO_REGEX } from "./regex";
 import type {
 	AutoModBadwordsOptions,
 	AutoModDupCache,
+	AutomodInviteOptions,
 	AutoModModuleFunctionResult,
 	AutoModResults,
 	AutoModXFilter,
@@ -37,11 +38,14 @@ export class AutoMod {
 		const badwordsConfig = { blacklisted: config.automod.BadwordsBlockedList, whitelisted: config.automod.BadwordsAllowedList };
 		const spamConfig = { amount: config.automod.SpamAmount, duration: config.automod.SpamDuration * 1e3 };
 		const mentionConfig = { amount: config.automod.MassMentionAmount, duration: config.automod.MassMentionDuration * 1e3 };
+		const duptextConfig = { amount: config.automod.DupTextAmount, duration: config.automod.DupTextDuration * 1e3 };
+		const inviteConfig = { whitelistedCodes: config.automod.inviteCodeWhitelist };
 
 		const automodModules: AutoModModuleFunctionResult[] = [];
-		if (config.automod.inviteEnabled && this.shouldAdd(message, config.automod.inviteWhitelist)) automodModules.push(this.invite(cleanMessage));
+		if (config.automod.inviteEnabled && this.shouldAdd(message, config.automod.inviteWhitelist))
+			automodModules.push(this.invite(cleanMessage, inviteConfig));
 		if (config.automod.DupTextEnabled && this.shouldAdd(message, config.automod.DupTextWhitelist))
-			automodModules.push(this.dupText(cleanMessage));
+			automodModules.push(this.dupText(cleanMessage, duptextConfig));
 		if (config.automod.PhishingEnabled && this.shouldAdd(message, config.automod.PhishingWhitelist))
 			automodModules.push(this.phishingCheck(cleanMessage));
 		if (config.automod.BadwordsEnabled && this.shouldAdd(message, config.automod.BadwordsWhitelist))
@@ -52,16 +56,16 @@ export class AutoMod {
 		if (config.automod.ZalgoEnabled && this.shouldAdd(message, config.automod.ZalgoWhitelist)) automodModules.push(this.zalgo(message));
 
 		const results = await Promise.all(automodModules);
-		console.log(results);
+		this.client.modaction.handleResults(results.filter((res) => res !== null) as AutoModResults[]);
 	}
 
-	public async invite(message: GuildMessage): Promise<AutoModResults | null> {
+	public async invite(message: GuildMessage, options: AutomodInviteOptions): Promise<AutoModResults | null> {
 		const invites = message.content.match(INVITE_REGEX) ?? [];
 
 		let invite: Invite | null = null;
 		for await (const inviteLink of invites) {
 			invite = await this.client.fetchInvite(inviteLink).catch(() => null);
-			if (invite) break;
+			if (invite && invite.guild?.id !== message.guildId && !options.whitelistedCodes.includes(invite.code)) break;
 		}
 
 		if (!invite) return null;
@@ -71,6 +75,7 @@ export class AutoMod {
 			user: message.author.id,
 			date: Date.now(),
 			key: "AUTOMOD_INVITE",
+			message,
 			vars: {
 				code: invite.code,
 				channel: message.channel.toString(),
@@ -79,7 +84,7 @@ export class AutoMod {
 		};
 	}
 
-	public dupText(message: GuildMessage): AutoModResults | null {
+	public dupText(message: GuildMessage, options: AutomodXFilterOptions): AutoModResults | null {
 		const newContent = message.content.toLowerCase();
 		const dupId = `${message.author.id}-${message.guildId}`;
 
@@ -98,6 +103,7 @@ export class AutoMod {
 					guild: message.guildId,
 					user: message.author.id,
 					date: Date.now(),
+					message,
 					key: "AUTOMOD_DUP_TEXT"
 				};
 		} else {
@@ -120,6 +126,7 @@ export class AutoMod {
 				guild: message.guildId,
 				user: message.author.id,
 				date: Date.now(),
+				message,
 				key: "AUTOMOD_PHISHING"
 			};
 
@@ -132,6 +139,7 @@ export class AutoMod {
 				guild: message.guildId,
 				user: message.author.id,
 				date: Date.now(),
+				message,
 				key: "AUTOMOD_ZALGO"
 			};
 
@@ -140,7 +148,7 @@ export class AutoMod {
 
 	public spam(message: GuildMessage, options: AutomodXFilterOptions): AutoModResults | null {
 		if (this.spamCache.has(`${message.author.id}-${message.guild.id}`)) {
-			const { lastMessage, timer, count } = this.spamCache.get(`${message.author.id}-${message.guild.id}`)!;
+			const { lastMessage, timer, count, messages } = this.spamCache.get(`${message.author.id}-${message.guild.id}`)!;
 			const difference = message.createdTimestamp - lastMessage.createdTimestamp;
 			let messageCount: number = count;
 
@@ -149,6 +157,7 @@ export class AutoMod {
 				this.spamCache.set(`${message.author.id}-${message.guild.id}`, {
 					count: 1,
 					lastMessage: message,
+					messages: [...messages, message],
 					timer: setTimeout(() => this.spamCache.delete(`${message.author.id}-${message.guild.id}`), options.duration)
 				});
 			} else {
@@ -156,6 +165,7 @@ export class AutoMod {
 				if (messageCount >= options.amount) {
 					this.spamCache.set(`${message.author.id}-${message.guild.id}`, {
 						lastMessage: message,
+						messages: [],
 						count: 1,
 						timer
 					});
@@ -164,11 +174,14 @@ export class AutoMod {
 						user: message.author.id,
 						date: Date.now(),
 						key: "AUTOMOD_SPAM",
-						vars: options
+						message,
+						vars: { ...options, messages: [...messages, message] }
 					};
 				}
+
 				this.spamCache.set(`${message.author.id}-${message.guild.id}`, {
 					lastMessage: message,
+					messages: [...messages, message],
 					count: messageCount,
 					timer
 				});
@@ -178,6 +191,7 @@ export class AutoMod {
 			this.spamCache.set(`${message.author.id}-${message.guild.id}`, {
 				count: 1,
 				lastMessage: message,
+				messages: [],
 				timer: fn
 			});
 		}
@@ -187,7 +201,7 @@ export class AutoMod {
 
 	public mention(message: GuildMessage, options: AutomodXFilterOptions): AutoModResults | null {
 		if (this.mentionCache.has(`${message.author.id}-${message.guild.id}`)) {
-			const { lastMessage, timer, count } = this.mentionCache.get(`${message.author.id}-${message.guild.id}`)!;
+			const { lastMessage, timer, count, messages } = this.mentionCache.get(`${message.author.id}-${message.guild.id}`)!;
 			const difference = message.createdTimestamp - lastMessage.createdTimestamp;
 			let mentionCount: number = count;
 
@@ -196,6 +210,7 @@ export class AutoMod {
 				this.mentionCache.set(`${message.author.id}-${message.guild.id}`, {
 					count: 1,
 					lastMessage: message,
+					messages: [...messages, message],
 					timer: setTimeout(() => this.mentionCache.delete(`${message.author.id}-${message.guild.id}`), options.duration)
 				});
 			} else {
@@ -204,6 +219,7 @@ export class AutoMod {
 				if (mentionCount >= options.amount) {
 					this.mentionCache.set(`${message.author.id}-${message.guild.id}`, {
 						lastMessage: message,
+						messages: [],
 						count: 1,
 						timer
 					});
@@ -212,12 +228,14 @@ export class AutoMod {
 						user: message.author.id,
 						date: Date.now(),
 						key: "AUTOMOD_MENTION",
-						vars: options
+						message,
+						vars: { ...options, messages }
 					};
 				}
 				this.mentionCache.set(`${message.author.id}-${message.guild.id}`, {
 					lastMessage: message,
 					count: mentionCount,
+					messages: [...messages, message],
 					timer
 				});
 			}
@@ -227,6 +245,7 @@ export class AutoMod {
 			this.mentionCache.set(`${message.author.id}-${message.guild.id}`, {
 				count: message.mentions.members?.filter((m) => !m.user.bot && m.id !== message.author.id).size ?? 0,
 				lastMessage: message,
+				messages: [],
 				timer: fn
 			});
 		}
@@ -256,6 +275,7 @@ export class AutoMod {
 			user: message.author.id,
 			date: Date.now(),
 			key: "AUTOMOD_BAD_WORDS",
+			message,
 			vars: {
 				words
 			}
@@ -273,6 +293,8 @@ export class AutoMod {
 
 		if (whitelist.includes(channel) || whitelist.includes(user)) return false;
 		if (roles.some((role) => whitelist.includes(role))) return false;
+		if (message.member.id === message.guild.ownerId) return false;
+		if (message.member.permissions.has("ADMINISTRATOR")) return false;
 
 		return true;
 	}

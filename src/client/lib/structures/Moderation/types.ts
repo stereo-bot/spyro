@@ -13,6 +13,7 @@ export interface AutoModResults {
 	date: number;
 	key: string;
 	vars?: Record<string, any>;
+	message: GuildMessage;
 }
 
 export interface AutoModCacheDupData {
@@ -26,6 +27,11 @@ export interface AutoModXFilter {
 	count: number;
 	lastMessage: Message;
 	timer: NodeJS.Timeout;
+	messages: GuildMessage[];
+}
+
+export interface AutomodInviteOptions {
+	whitelistedCodes: string[];
 }
 
 export interface AutomodXFilterOptions {

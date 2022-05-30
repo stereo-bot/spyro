@@ -56,7 +56,10 @@ export class LocaleManager {
 		if (!lang) return `Lanuage ${language} was not found`;
 
 		const [_file, path] = _path.split(":");
-		const parsed = this.parse(lang[_file]);
+		const filePath = lang[_file];
+		if (!filePath) return `File ${_file} for language ${language} was not found`;
+
+		const parsed = this.parse(filePath);
 
 		let data = dotprop.get(parsed, path) as string;
 		if (typeof data !== "string" || !data.length) return `${_path} is not a valid language path`;

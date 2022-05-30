@@ -29,19 +29,21 @@ model AutoModConfig {
 
   moduleEnabled   Boolean  @default(false)
   MuteDuration    Int      @default(600) // duration in seconds (max 24 hours)
+  BanDuration     Int      @default(86400) // duration in seconds (max 30 days)
   globalWhitelist String[]
 
-
-  inviteEnabled   Boolean          @default(true)
-  inviteDelete    Boolean          @default(true)
-  inviteAction    ModerationAction @default(WARN)
-  inviteWhitelist String[]
-
+  inviteEnabled       Boolean          @default(true)
+  inviteDelete        Boolean          @default(true)
+  inviteAction        ModerationAction @default(WARN)
+  inviteWhitelist     String[]
+  inviteCodeWhitelist String[]
 
   DupTextEnabled   Boolean          @default(true)
   DupTextDelete    Boolean          @default(false)
   DupTextAction    ModerationAction @default(VERBAL)
   DupTextWhitelist String[]
+  DupTextDuration  Int              @default(600) // in seconds, max 10m
+  DupTextAmount    Int              @default(2) // max 20
 
   SpamEnabled   Boolean          @default(true)
   SpamDelete    Boolean          @default(true)
@@ -90,9 +92,24 @@ model LoggingConfig {
   modWebhook String?
 }
 
+model Modlog {
+  id String @id // guildId-caseId
+
+  member    String
+  moderator String
+
+  modlogType Int
+  reason     String
+
+  expire DateTime?
+  date   DateTime
+}
+
 enum ModerationAction {
   VERBAL
   WARN
   MUTE
+  KICK
+  SOFTBAN
   BAN
 }
