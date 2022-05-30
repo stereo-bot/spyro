@@ -5,6 +5,7 @@ import { Modlog } from "./Modlog";
 import { getCaseId } from "../../utils";
 import ms from "ms";
 import { ModlogType } from "../../../types";
+import type { GuildMember } from "discord.js";
 
 export class ModAction {
 	public constructor(public client: Client) {}
@@ -80,11 +81,13 @@ export class ModAction {
 
 		try {
 			await member.timeout(duration, modlog.reason);
+			this.client.modLogger.onModAdd(modlog);
 		} catch (err) {
 			this.client.logger.error(`[ModAction#mute()]: Error occurred while timing out a user`, err);
-		}
 
-		this.client.modLogger.onModAdd(modlog);
+			await modlog.delete();
+			throw new Error("MUTE_ERROR");
+		}
 	}
 
 	public async kick(modlog: Modlog) {
@@ -104,11 +107,13 @@ export class ModAction {
 
 		try {
 			await member.kick(modlog.reason);
+			this.client.modLogger.onModAdd(modlog);
 		} catch (err) {
 			this.client.logger.error(`[ModAction#kick()]: Error occurred while kicking a user`, err);
-		}
 
-		this.client.modLogger.onModAdd(modlog);
+			await modlog.delete();
+			throw new Error("KICK_ERROR");
+		}
 	}
 
 	public async softban(modlog: Modlog) {
@@ -129,11 +134,13 @@ export class ModAction {
 		try {
 			await member.ban({ reason: modlog.reason, days: 7 });
 			await modlog.guild.bans.remove(modlog.member);
+			this.client.modLogger.onModAdd(modlog);
 		} catch (err) {
 			this.client.logger.error(`[ModAction#softban()]: Error occurred while banning/unbanning a user`, err);
-		}
 
-		this.client.modLogger.onModAdd(modlog);
+			await modlog.delete();
+			throw new Error("SOFTBAN_ERROR");
+		}
 	}
 
 	public async ban(modlog: Modlog) {
@@ -153,11 +160,65 @@ export class ModAction {
 
 		try {
 			await member.ban({ reason: modlog.reason });
+			this.client.modLogger.onModAdd(modlog);
 		} catch (err) {
 			this.client.logger.error(`[ModAction#ban()]: Error occurred while banning a user`, err);
+
+			await modlog.delete();
+			throw new Error("BAN_ERROR");
+		}
+	}
+
+	public async unban(modlog: Modlog) {
+		if (!modlog.guild.me?.permissions.has("BAN_MEMBERS")) {
+			await modlog.delete();
+			throw new Error("NO_BAN_PERMISSIONS");
 		}
 
-		this.client.modLogger.onModAdd(modlog);
+		try {
+			await modlog.guild.bans.remove(modlog.member, modlog.reason);
+			this.client.modLogger.onModAdd(modlog);
+		} catch (err) {
+			this.client.logger.error(`[ModAction#unban()]: Error occurred while unbanning a user`, err);
+
+			await modlog.delete();
+			throw new Error("UNBAN_ERROR");
+		}
+	}
+
+	public async unmute(member: GuildMember) {
+		if (!member.moderatable) {
+			throw new Error("MEMBER_NOT_MODERATABLE"); // We cannot issue an unmute for an unmanagable user
+		}
+
+		try {
+			await member.disableCommunicationUntil(null);
+		} catch (err) {
+			this.client.logger.error(`[ModAction#unmute()]: Error occurred while unmuting a user`, err);
+		}
+	}
+
+	/**
+	 * @param id The caseId of the modlog, don't provide one if you want to delete all cases
+	 */
+	public async removelogs(guildId: string, memberId: string, id?: string) {
+		if (id) {
+			const _id = `${guildId}-${id}`;
+			const _modlog = await this.client.prisma.modlog.findFirst({ where: { id: _id } });
+			if (!_modlog) return;
+
+			const modlog = new Modlog(this.client, _modlog);
+
+			try {
+				await modlog.delete();
+			} catch (err) {
+				this.client.logger.fatal(`[ModAction#removelogs()]: Error occurred while removing a modlog`, err);
+			}
+
+			return;
+		}
+
+		await this.client.prisma.modlog.deleteMany({ where: { member: memberId } }).catch(() => void 0);
 	}
 
 	private get t() {
