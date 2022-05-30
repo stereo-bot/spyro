@@ -273,6 +273,8 @@ export class AutoMod {
 
 		if (whitelist.includes(channel) || whitelist.includes(user)) return false;
 		if (roles.some((role) => whitelist.includes(role))) return false;
+		if (message.member.id === message.guild.ownerId) return false;
+		if (message.member.permissions.has("ADMINISTRATOR")) return false;
 
 		return true;
 	}
