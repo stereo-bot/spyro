@@ -71,10 +71,91 @@ export class ModAction {
 
 		const member = await this.client.utils.fetchMember(modlog.member.id, modlog.guild);
 		if (!member) throw new Error("GUILD_MEMBER_NOT_FOUND");
-		if (member.isCommunicationDisabled()) throw new Error("GUILD_MEMBER_MUTED");
+		if (!member.moderatable) {
+			await modlog.delete();
+			throw new Error("MEMBER_NOT_MODERATABLE"); // We cannot issue a punishment for an unpunishable user
+		}
 
 		await modlog.member.send(userMessage).catch(() => void 0); // catch: User closed his DMs or is no longer in the guild.
-		await member.timeout(duration, modlog.reason).catch(() => void 0);
+
+		try {
+			await member.timeout(duration, modlog.reason);
+		} catch (err) {
+			this.client.logger.error(`[ModAction#mute()]: Error occurred while timing out a user`, err);
+		}
+
+		this.client.modLogger.onModAdd(modlog);
+	}
+
+	public async kick(modlog: Modlog) {
+		const userMessage = this.t(modlog.locale, "moderation:user_dm.kick", {
+			guild: modlog.guild.name,
+			reason: modlog.reason
+		});
+
+		const member = await this.client.utils.fetchMember(modlog.member.id, modlog.guild);
+		if (!member) throw new Error("GUILD_MEMBER_NOT_FOUND");
+		if (!member.kickable) {
+			await modlog.delete();
+			throw new Error("MEMBER_NOT_MODERATABLE"); // We cannot issue a punishment for an unpunishable user
+		}
+
+		await modlog.member.send(userMessage).catch(() => void 0); // catch: User closed his DMs or is no longer in the guild.
+
+		try {
+			await member.kick(modlog.reason);
+		} catch (err) {
+			this.client.logger.error(`[ModAction#kick()]: Error occurred while kicking a user`, err);
+		}
+
+		this.client.modLogger.onModAdd(modlog);
+	}
+
+	public async softban(modlog: Modlog) {
+		const userMessage = this.t(modlog.locale, "moderation:user_dm.softban", {
+			guild: modlog.guild.name,
+			reason: modlog.reason
+		});
+
+		const member = await this.client.utils.fetchMember(modlog.member.id, modlog.guild);
+		if (!member) throw new Error("GUILD_MEMBER_NOT_FOUND");
+		if (!member.bannable) {
+			await modlog.delete();
+			throw new Error("MEMBER_NOT_MODERATABLE"); // We cannot issue a punishment for an unpunishable user
+		}
+
+		await modlog.member.send(userMessage).catch(() => void 0); // catch: User closed his DMs or is no longer in the guild.
+
+		try {
+			await member.ban({ reason: modlog.reason, days: 7 });
+			await modlog.guild.bans.remove(modlog.member);
+		} catch (err) {
+			this.client.logger.error(`[ModAction#softban()]: Error occurred while banning/unbanning a user`, err);
+		}
+
+		this.client.modLogger.onModAdd(modlog);
+	}
+
+	public async ban(modlog: Modlog) {
+		const userMessage = this.t(modlog.locale, "moderation:user_dm.softban", {
+			guild: modlog.guild.name,
+			reason: modlog.reason
+		});
+
+		const member = await this.client.utils.fetchMember(modlog.member.id, modlog.guild);
+		if (!member) throw new Error("GUILD_MEMBER_NOT_FOUND");
+		if (!member.bannable) {
+			await modlog.delete();
+			throw new Error("MEMBER_NOT_MODERATABLE"); // We cannot issue a punishment for an unpunishable user
+		}
+
+		await modlog.member.send(userMessage).catch(() => void 0); // catch: User closed his DMs or is no longer in the guild.
+
+		try {
+			await member.ban({ reason: modlog.reason });
+		} catch (err) {
+			this.client.logger.error(`[ModAction#ban()]: Error occurred while banning a user`, err);
+		}
 
 		this.client.modLogger.onModAdd(modlog);
 	}
