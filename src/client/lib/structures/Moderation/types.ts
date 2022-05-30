@@ -28,6 +28,10 @@ export interface AutoModXFilter {
 	timer: NodeJS.Timeout;
 }
 
+export interface AutomodInviteOptions {
+	whitelistedCodes: string[];
+}
+
 export interface AutomodXFilterOptions {
 	amount: number;
 	duration: number;

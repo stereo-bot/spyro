@@ -4,6 +4,7 @@ import { INVITE_REGEX, ZALGO_REGEX } from "./regex";
 import type {
 	AutoModBadwordsOptions,
 	AutoModDupCache,
+	AutomodInviteOptions,
 	AutoModModuleFunctionResult,
 	AutoModResults,
 	AutoModXFilter,
@@ -37,11 +38,14 @@ export class AutoMod {
 		const badwordsConfig = { blacklisted: config.automod.BadwordsBlockedList, whitelisted: config.automod.BadwordsAllowedList };
 		const spamConfig = { amount: config.automod.SpamAmount, duration: config.automod.SpamDuration * 1e3 };
 		const mentionConfig = { amount: config.automod.MassMentionAmount, duration: config.automod.MassMentionDuration * 1e3 };
+		const duptextConfig = { amount: config.automod.DupTextAmount, duration: config.automod.DupTextDuration * 1e3 };
+		const inviteConfig = { whitelistedCodes: config.automod.inviteCodeWhitelist };
 
 		const automodModules: AutoModModuleFunctionResult[] = [];
-		if (config.automod.inviteEnabled && this.shouldAdd(message, config.automod.inviteWhitelist)) automodModules.push(this.invite(cleanMessage));
+		if (config.automod.inviteEnabled && this.shouldAdd(message, config.automod.inviteWhitelist))
+			automodModules.push(this.invite(cleanMessage, inviteConfig));
 		if (config.automod.DupTextEnabled && this.shouldAdd(message, config.automod.DupTextWhitelist))
-			automodModules.push(this.dupText(cleanMessage));
+			automodModules.push(this.dupText(cleanMessage, duptextConfig));
 		if (config.automod.PhishingEnabled && this.shouldAdd(message, config.automod.PhishingWhitelist))
 			automodModules.push(this.phishingCheck(cleanMessage));
 		if (config.automod.BadwordsEnabled && this.shouldAdd(message, config.automod.BadwordsWhitelist))
@@ -55,13 +59,13 @@ export class AutoMod {
 		this.client.modaction.handleResults(results.filter((res) => res !== null) as AutoModResults[]);
 	}
 
-	public async invite(message: GuildMessage): Promise<AutoModResults | null> {
+	public async invite(message: GuildMessage, options: AutomodInviteOptions): Promise<AutoModResults | null> {
 		const invites = message.content.match(INVITE_REGEX) ?? [];
 
 		let invite: Invite | null = null;
 		for await (const inviteLink of invites) {
 			invite = await this.client.fetchInvite(inviteLink).catch(() => null);
-			if (invite && invite.guild?.id !== message.guildId) break;
+			if (invite && invite.guild?.id !== message.guildId && !options.whitelistedCodes.includes(invite.code)) break;
 		}
 
 		if (!invite) return null;
@@ -79,7 +83,7 @@ export class AutoMod {
 		};
 	}
 
-	public dupText(message: GuildMessage): AutoModResults | null {
+	public dupText(message: GuildMessage, options: AutomodXFilterOptions): AutoModResults | null {
 		const newContent = message.content.toLowerCase();
 		const dupId = `${message.author.id}-${message.guildId}`;
 
