@@ -34,7 +34,7 @@
 		"end": {
 			"description_member": "**Member**: {member}",
 			"description_action": "**Action**: {action}",
-			"description_date": "**Original Action Taken**: {date}"
+			"description_reason": "**Reason**: {reason}"
 		}
 	}
 }
