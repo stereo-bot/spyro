@@ -175,7 +175,7 @@ export class AutoMod {
 						date: Date.now(),
 						key: "AUTOMOD_SPAM",
 						message,
-						vars: { ...options, messages }
+						vars: { ...options, messages: [...messages, message] }
 					};
 				}
 
