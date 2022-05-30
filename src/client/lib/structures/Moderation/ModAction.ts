@@ -236,22 +236,22 @@ export class ModAction {
 			case "AUTOMOD_INVITE":
 				action = config.automod.inviteAction;
 				deleteMessage = config.automod.inviteDelete;
-				reason = this.t(config.locale, "moderation.automod_reasons.invite", data.vars);
+				reason = this.t(config.locale, "moderation:automod_reasons.invite", data.vars);
 				break;
 			case "AUTOMOD_DUP_TEXT":
 				action = config.automod.DupTextAction;
 				deleteMessage = config.automod.DupTextDelete;
-				reason = this.t(config.locale, "moderation.automod_reasons.duplicate", data.vars);
+				reason = this.t(config.locale, "moderation:automod_reasons.duplicate", data.vars);
 				break;
 			case "AUTOMOD_PHISHING":
 				action = config.automod.PhishingAction;
 				deleteMessage = config.automod.PhishingDelete;
-				reason = this.t(config.locale, "moderation.automod_reasons.phishing", data.vars);
+				reason = this.t(config.locale, "moderation:automod_reasons.phishing", data.vars);
 				break;
 			case "AUTOMOD_ZALGO":
 				action = config.automod.ZalgoAction;
 				deleteMessage = config.automod.ZalgoDelete;
-				reason = this.t(config.locale, "moderation.automod_reasons.zalgo", data.vars);
+				reason = this.t(config.locale, "moderation:automod_reasons.zalgo", data.vars);
 				break;
 			case "AUTOMOD_SPAM":
 				{
@@ -259,7 +259,7 @@ export class ModAction {
 					deleteMessage = config.automod.SpamDelete;
 
 					const vars = { ...data.vars, duration: ms(data.vars?.duration ?? 0) };
-					reason = this.t(config.locale, "moderation.automod_reasons.spam", vars);
+					reason = this.t(config.locale, "moderation:automod_reasons.spam", vars);
 				}
 				break;
 			case "AUTOMOD_MENTION":
@@ -268,7 +268,7 @@ export class ModAction {
 					deleteMessage = config.automod.MassMentionDelete;
 
 					const vars = { ...data.vars, duration: ms(data.vars?.duration ?? 0) };
-					reason = this.t(config.locale, "moderation.automod_reasons.mention", vars);
+					reason = this.t(config.locale, "moderation:automod_reasons.mention", vars);
 				}
 				break;
 			default:
