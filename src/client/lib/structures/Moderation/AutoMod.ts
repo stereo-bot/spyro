@@ -52,7 +52,7 @@ export class AutoMod {
 		if (config.automod.ZalgoEnabled && this.shouldAdd(message, config.automod.ZalgoWhitelist)) automodModules.push(this.zalgo(message));
 
 		const results = await Promise.all(automodModules);
-		console.log(results);
+		this.client.modaction.handleResults(results.filter((res) => res !== null) as AutoModResults[]);
 	}
 
 	public async invite(message: GuildMessage): Promise<AutoModResults | null> {
