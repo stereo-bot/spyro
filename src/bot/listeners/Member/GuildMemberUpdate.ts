@@ -53,7 +53,7 @@ export default class extends Listener {
 
 				return true;
 			};
-			const auditlog = auditlogs?.entries.find(filter);
+			const auditlog = auditlogs?.entries.sort((a, b) => b.createdTimestamp - a.createdTimestamp).find(filter);
 			if (!auditlog || !change) return;
 
 			const moderator = await this.client.utils.fetchUser(auditlog.executor?.id ?? "");
