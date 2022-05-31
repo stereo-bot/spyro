@@ -24,5 +24,14 @@
 		"spam": "Stop spamming in this channel.",
 		"mention": "Mass mentioning users isn't allowed here.",
 		"badwords": "You aren't allowed to say that here."
+	},
+	"errors": {
+		"moderatable": {
+			"bot_self": "You cannot perform this action on me.",
+			"user_self": "You cannot perform this action on yourself.",
+			"owner": "You cannot perform this action on the owner of this server.",
+			"bot_hierarchy": "I cannot perform this action due to role hierarchy.",
+			"user_hierarchy": "You cannot perform this action due to role hierarchy."
+		}
 	}
 }

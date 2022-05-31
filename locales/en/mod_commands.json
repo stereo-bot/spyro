@@ -1,0 +1,6 @@
+{
+	"warn": {
+		"response": "**{user}** received a warning, reason: {reason}",
+		"no_user": "Unable to find a user with the given arguments."
+	}
+}
