@@ -8,6 +8,6 @@ export default class extends Listener {
 		if (!messageNew.inGuild()) return;
 
 		this.client.messageLogger.onMessageUpdate(messageOld as GuildMessage, messageNew as GuildMessage);
-		await this.client.automod.run(messageNew as GuildMessage);
+		if (messageOld.content.toLowerCase() !== messageNew.content.toLowerCase()) await this.client.automod.run(messageNew as GuildMessage);
 	}
 }
