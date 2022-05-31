@@ -304,6 +304,15 @@ export class ModAction {
 					response = this.t(config.locale, "moderation:automod_responses.mention");
 				}
 				break;
+			case "AUTOMOD_BAD_WORDS":
+				{
+					action = config.automod.BadwordsAction;
+					deleteMessage = config.automod.BadwordsDelete;
+
+					reason = this.t(config.locale, "moderation:automod_reasons.badwords", { words: data.vars?.words });
+					response = this.t(config.locale, "moderation:automod_responses.badwords");
+				}
+				break;
 			default:
 				action = ModerationAction.VERBAL;
 				deleteMessage = true;

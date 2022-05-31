@@ -13,7 +13,8 @@
 		"phishing": "Automatic action carried out for posting a possible phising link.",
 		"zalgo": "Automatic action carried out for posting a message with zalgo text.",
 		"spam": "Automatic action carried out for hitting the message rate limit ({amount}/{duration}).",
-		"mention": "Automatic action carried out for hitting the mention rate limit ({amount}/{duration})."
+		"mention": "Automatic action carried out for hitting the mention rate limit ({amount}/{duration}).",
+		"badwords": "Automatic action carried out for using blacklisted word(s) ({words})."
 	},
 	"automod_responses": {
 		"invite": "You aren't allowed to post invite links here.",
@@ -21,6 +22,7 @@
 		"phishing": "Phishing links are forbidden in this channel.",
 		"zalgo": "You aren't allowed to use zalgo text here.",
 		"spam": "Stop spamming in this channel.",
-		"mention": "Mass mentioning users isn't allowed here."
+		"mention": "Mass mentioning users isn't allowed here.",
+		"badwords": "You aren't allowed to say that here."
 	}
 }
