@@ -17,7 +17,7 @@ export class MessageLogger {
 	public constructor(public client: Client) {}
 
 	public onMessageDelete(message: GuildMessage) {
-		if (message.author.bot || message.webhookId) return;
+		if (message.author.bot || message.webhookId || !message.content) return;
 		const { locale } = this.client.configManager.get(message.guildId);
 
 		const embed = this.client.utils
@@ -79,7 +79,7 @@ export class MessageLogger {
 	}
 
 	public onMessageDeleteBulk(messagesCol: Collection<string, GuildMessage>) {
-		const messages = messagesCol.filter((msg) => !msg.author.bot && !msg.webhookId && Boolean(msg.guild));
+		const messages = messagesCol.filter((msg) => !msg.author.bot && !msg.webhookId && Boolean(msg.guild) && Boolean(msg.content));
 		if (!messages.size) return;
 
 		const message = messages.first()!;
