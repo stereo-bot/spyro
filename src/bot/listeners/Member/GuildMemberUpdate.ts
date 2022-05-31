@@ -13,7 +13,7 @@ export default class extends Listener {
 			if (!auditlogs) return;
 
 			const filter = (log: GuildAuditLogsEntry<"MEMBER_UPDATE", "MEMBER_UPDATE", "UPDATE", "USER">) => {
-				if (log.target?.id !== newMember.id) return false;
+				if (log.target?.id !== newMember.id || log.executor?.id === this.client.user?.id) return false;
 
 				const change = log.changes?.find(
 					(change) => change.key === "communication_disabled_until" && typeof change.old === "string" && typeof change.new === "undefined"
@@ -45,7 +45,7 @@ export default class extends Listener {
 
 			let change: AuditLogChange | undefined;
 			const filter = (log: GuildAuditLogsEntry<"MEMBER_UPDATE", "MEMBER_UPDATE", "UPDATE", "USER">) => {
-				if (log.target?.id !== newMember.id) return false;
+				if (log.target?.id !== newMember.id || log.executor?.id === this.client.user?.id) return false;
 
 				const changes = log.changes?.filter(
 					(change) => change.key === "communication_disabled_until" && typeof change.new === "string" && typeof change.old === "undefined"
