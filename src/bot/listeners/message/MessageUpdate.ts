@@ -8,7 +8,7 @@ export default class extends Listener {
 		if (!messageNew.inGuild()) return;
 
 		this.client.messageLogger.onMessageUpdate(messageOld as GuildMessage, messageNew as GuildMessage);
-		if (messageOld.content.toLowerCase() !== messageNew.content.toLowerCase()) {
+		if (messageOld.content !== messageNew.content && !messageNew.author.bot && !messageNew.webhookId) {
 			const changed = this.client.utils.getUnCommonWords(messageOld.content, messageNew.content);
 			messageNew.content = changed.join(" ");
 
