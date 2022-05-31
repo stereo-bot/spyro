@@ -1,4 +1,4 @@
-import { Collection, MessageAttachment, MessageEmbed, WebhookClient } from "discord.js";
+import { Collection, MessageAttachment, MessageEmbed, User, WebhookClient } from "discord.js";
 import moment from "moment";
 import type { Client } from "../../../";
 import { EMBED_BLANK, EMBED_MOD_EXTREME, EMBED_MOD_HIGH, EMBED_MOD_LOW, EMBED_MOD_MEDIUM, EMBED_SUCCESS } from "../../../constants";
@@ -9,6 +9,16 @@ interface Queue {
 	embeds: MessageEmbed[];
 	attachments: MessageAttachment[];
 	guildId: string;
+}
+
+interface ModEndData {
+	reason: string;
+	guildId: string;
+
+	moderator: User;
+	member: User;
+
+	modlogType: ModlogType;
 }
 
 export class ModLogger {
@@ -80,8 +90,9 @@ export class ModLogger {
 		this.sendLogs(embed, data.guild.id);
 	}
 
-	public onModEnd(data: Modlog) {
+	public onModEnd(data: ModEndData) {
 		const embed = this.client.utils.embed();
+		const { locale } = this.client.configManager.get(data.guildId);
 		const basePath = "logging:mod.end";
 
 		embed.setColor(EMBED_SUCCESS);
@@ -89,19 +100,19 @@ export class ModLogger {
 			iconURL: data.moderator.displayAvatarURL({ dynamic: true, size: 32 }),
 			name: `${data.moderator.tag} (${data.moderator.id})`
 		});
-		embed.setFooter({ text: `Case #${data.caseId}` }).setTimestamp();
+		embed.setTimestamp();
 		embed.setDescription(
 			[
-				this.t(data.locale, `${basePath}.description_member`, { member: `\`${data.member.tag}\`` }),
+				this.t(locale, `${basePath}.description_member`, { member: `\`${data.member.tag}\`` }),
 				`⤷ <@${data.member.id}> - ${data.member.id}`,
-				this.t(data.locale, `${basePath}.description_action`, { action: this.t(data.locale, `common:mod_actions_end.${data.modlogType}`) }),
-				this.t(data.locale, `${basePath}.description_date`, { date: `<t:${moment(data.date).unix()}:R>` })
+				this.t(locale, `${basePath}.description_action`, { action: this.t(locale, `common:mod_actions_end.${data.modlogType}`) }),
+				this.t(locale, `${basePath}.description_reason`, { reason: data.reason })
 			]
 				.filter((str) => typeof str === "string")
 				.join("\n")
 		);
 
-		this.sendLogs(embed, data.guild.id);
+		this.sendLogs(embed, data.guildId);
 	}
 
 	public sendLogs(embed: MessageEmbed, guildId: string, attachment?: MessageAttachment) {
