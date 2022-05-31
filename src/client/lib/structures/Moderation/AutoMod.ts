@@ -33,7 +33,7 @@ export class AutoMod {
 		if (message.author.bot || message.webhookId) return;
 
 		const config = this.client.configManager.get(message.guildId);
-		if (!this.shouldAdd(message, config.automod.globalWhitelist)) return;
+		if (!config.automod.moduleEnabled || !this.shouldAdd(message, config.automod.globalWhitelist)) return;
 
 		const badwordsConfig = { blacklisted: config.automod.BadwordsBlockedList, whitelisted: config.automod.BadwordsAllowedList };
 		const spamConfig = { amount: config.automod.SpamAmount, duration: config.automod.SpamDuration * 1e3 };
