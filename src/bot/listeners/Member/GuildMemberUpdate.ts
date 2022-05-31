@@ -1,4 +1,4 @@
-import { getCaseId, Listener, Modlog, ModlogType } from "../../../client";
+import { checkDate, getCaseId, Listener, Modlog, ModlogType } from "../../../client";
 import { ApplyOptions } from "@sapphire/decorators";
 import type { AuditLogChange, GuildAuditLogsEntry, GuildMember } from "discord.js";
 import { Events } from "@sapphire/framework";
@@ -19,6 +19,8 @@ export default class extends Listener {
 					(change) => change.key === "communication_disabled_until" && typeof change.old === "string" && typeof change.new === "undefined"
 				);
 				if (!change) return false;
+
+				if (!checkDate(log.createdTimestamp)) return false;
 
 				return true;
 			};
@@ -50,6 +52,8 @@ export default class extends Listener {
 				);
 				if (!changes?.length) return false;
 				change = changes[changes.length - 1];
+
+				if (!checkDate(log.createdTimestamp)) return false;
 
 				return true;
 			};

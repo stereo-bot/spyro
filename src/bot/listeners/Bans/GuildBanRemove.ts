@@ -1,4 +1,4 @@
-import { Listener, ModlogType } from "../../../client";
+import { checkDate, Listener, ModlogType } from "../../../client";
 import { ApplyOptions } from "@sapphire/decorators";
 import type { GuildBan } from "discord.js";
 import { Events } from "@sapphire/framework";
@@ -14,7 +14,9 @@ export default class extends Listener {
 			.catch(() => void 0);
 		if (!auditlogs) return;
 
-		const auditlog = auditlogs.entries.sort((a, b) => b.createdTimestamp - a.createdTimestamp).find((log) => log.target?.id === ban.user.id);
+		const auditlog = auditlogs.entries
+			.sort((a, b) => b.createdTimestamp - a.createdTimestamp)
+			.find((log) => log.target?.id === ban.user.id && checkDate(log.createdTimestamp));
 		if (!auditlog) return;
 
 		const moderator = await this.client.utils.fetchUser(auditlog.executor?.id ?? "");
