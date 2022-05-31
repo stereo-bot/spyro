@@ -33,6 +33,15 @@ export class Utils {
 		return str.replace(/\*/g, "").replace(/`/g, "").replace(/|/g, "").replace(/_/g, "").replace(/\\/g, "");
 	}
 
+	/**
+	 * @param str1 The string with old content
+	 * @param str2 The string with new content
+	 */
+	public getUnCommonWords(str1: string, str2: string): string[] {
+		const res = str2.split(/ +/g).filter((str) => !str1.toLowerCase().includes(str.toLowerCase()));
+		return res;
+	}
+
 	public getColour(manager: GuildMemberRoleManager) {
 		return manager.hoist && manager.hoist.color > 0
 			? manager.hoist.hexColor
