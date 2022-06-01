@@ -45,7 +45,7 @@ export default class extends Command {
 		}
 
 		await this.sharedRun(member.user, message.author, locale, message.guildId, reason);
-		await message.reply(this.t(locale, "mod_commands:warn.response", { user: member.user.tag, reason }));
+		await message.reply(this.t(locale, "mod_commands:warn.response", { user: member.user.tag, reason: reason ?? "-" }));
 	}
 
 	public async chatInputRun(interaction: CommandInteraction<"cached">): Promise<void> {
@@ -61,7 +61,7 @@ export default class extends Command {
 		}
 
 		await this.sharedRun(member.user, interaction.user, locale, interaction.guildId, reason);
-		await interaction.followUp(this.t(interaction.locale, "mod_commands:warn.response", { user: member.user.tag, reason }));
+		await interaction.followUp(this.t(interaction.locale, "mod_commands:warn.response", { user: member.user.tag, reason: reason ?? "-" }));
 	}
 
 	private async sharedRun(user: User, moderator: User, locale: string, guildId: string, reason?: string) {
@@ -80,6 +80,6 @@ export default class extends Command {
 			id
 		});
 
-		this.client.modLogger.onModAdd(modlog);
+		await this.client.modaction.warn(modlog);
 	}
 }
