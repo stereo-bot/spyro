@@ -1,6 +1,8 @@
 {
-	"warn": {
-		"response": "**{user}** received a warning, reason: {reason}",
+	"global": {
 		"no_user": "Unable to find a user with the given arguments."
+	},
+	"warn": {
+		"response": "**{user}** received a warning, reason: {reason}"
 	}
 }

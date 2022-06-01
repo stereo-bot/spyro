@@ -34,7 +34,7 @@ export default class extends Command {
 		const { value: member } = await args.pickResult("member");
 		const { value: reason } = await args.restResult("string");
 		if (!member) {
-			await message.reply(this.t(locale, "mod_commands:warn.no_user"));
+			await message.reply(this.t(locale, "mod_commands:global.no_user"));
 			return;
 		}
 
