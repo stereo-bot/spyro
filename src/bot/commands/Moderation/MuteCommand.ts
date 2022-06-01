@@ -10,6 +10,7 @@ import moment from "moment";
 	usage: "<user> <duration> [reason]",
 	preconditions: ["GuildOnly"],
 	requiredUserPermissions: ["MODERATE_MEMBERS"],
+	requiredClientPermissions: ["MODERATE_MEMBERS"],
 	chatInputCommand: {
 		register: true,
 		messageCommand: true,
