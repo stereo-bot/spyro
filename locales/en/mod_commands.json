@@ -1,8 +1,12 @@
 {
 	"global": {
-		"no_user": "Unable to find a user with the given arguments."
+		"no_user": "Unable to find a user with the given arguments.",
+		"no_duration": "I cannot mute this user without a duration"
 	},
 	"warn": {
 		"response": "**{user}** received a warning, reason: {reason}"
+	},
+	"mute": {
+		"response": "**{user}** received a mute for `{duration}`, reason: {reason}"
 	}
 }
