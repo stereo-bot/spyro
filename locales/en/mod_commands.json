@@ -8,5 +8,11 @@
 	},
 	"mute": {
 		"response": "**{user}** received a mute for `{duration}`, reason: {reason}"
+	},
+	"kick": {
+		"response": "**{user}** was kicked from the server for `{duration}`, reason: {reason}"
+	},
+	"ban": {
+		"response": "**{user}** was banned from the server for `{duration}`, reason: {reason}"
 	}
 }
