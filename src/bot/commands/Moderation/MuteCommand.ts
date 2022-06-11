@@ -17,7 +17,7 @@ import moment from "moment";
 		options: [
 			{
 				name: "user",
-				description: "The user you want to give a warning to.",
+				description: "The user you want to mute to.",
 				type: "USER",
 				required: true
 			},
@@ -29,7 +29,7 @@ import moment from "moment";
 			},
 			{
 				name: "reason",
-				description: "The reason why you gave them a warning.",
+				description: "The reason why you gave them a mute.",
 				type: "STRING",
 				required: false
 			}
