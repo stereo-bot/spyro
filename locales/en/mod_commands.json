@@ -14,5 +14,8 @@
 	},
 	"ban": {
 		"response": "**{user}** was banned from the server for `{duration}`, reason: {reason}"
+	},
+	"softban": {
+		"response": "**{user}** was softbanned from the server for `{duration}`, reason: {reason}"
 	}
 }
