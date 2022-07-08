@@ -1,0 +1,21 @@
+{
+	"global": {
+		"no_user": "Unable to find a user with the given arguments.",
+		"no_duration": "I cannot mute this user without a duration"
+	},
+	"warn": {
+		"response": "**{user}** received a warning, reason: {reason}"
+	},
+	"mute": {
+		"response": "**{user}** received a mute for `{duration}`, reason: {reason}"
+	},
+	"kick": {
+		"response": "**{user}** was kicked from the server for `{duration}`, reason: {reason}"
+	},
+	"ban": {
+		"response": "**{user}** was banned from the server for `{duration}`, reason: {reason}"
+	},
+	"softban": {
+		"response": "**{user}** was softbanned from the server for `{duration}`, reason: {reason}"
+	}
+}
