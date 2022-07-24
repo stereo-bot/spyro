@@ -32,7 +32,7 @@
 		"@sapphire/plugin-subcommands": "^2.2.2",
 		"@sapphire/type": "^2.2.4",
 		"axios": "^0.27.2",
-		"discord.js": "^13.9.1",
+		"discord.js": "^14.0.3",
 		"dotenv": "^16.0.1",
 		"fuse.js": "^6.6.2",
 		"moment": "^2.29.4",
