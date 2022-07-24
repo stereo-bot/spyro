@@ -14,25 +14,25 @@
 		"@types/ms": "^0.7.31",
 		"@types/node": "^16.11.45",
 		"@types/unzalgo": "^3.0.0",
-		"@typescript-eslint/eslint-plugin": "^5.30.6",
-		"@typescript-eslint/parser": "^5.30.6",
+		"@typescript-eslint/eslint-plugin": "^5.30.7",
+		"@typescript-eslint/parser": "^5.30.7",
 		"cross-env": "^7.0.3",
 		"eslint": "^8.20.0",
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-prettier": "^4.2.1",
 		"husky": "^8.0.1",
 		"lint-staged": "^13.0.3",
-		"prisma": "^4.0.0"
+		"prisma": "^4.1.0"
 	},
 	"dependencies": {
 		"@daangamesdg/sapphire-logger": "^1.0.5",
-		"@prisma/client": "^4.0.0",
+		"@prisma/client": "^4.1.0",
 		"@sapphire/decorators": "^4.3.8",
 		"@sapphire/framework": "next",
 		"@sapphire/plugin-subcommands": "^2.2.2",
 		"@sapphire/type": "^2.2.4",
 		"axios": "^0.27.2",
-		"discord.js": "^13.8.1",
+		"discord.js": "^13.9.1",
 		"dotenv": "^16.0.1",
 		"fuse.js": "^6.6.2",
 		"moment": "^2.29.4",
@@ -49,5 +49,5 @@
 		"generate-types": "prisma generate",
 		"prepare": "husky install"
 	},
-	"packageManager": "yarn@3.2.1"
+	"packageManager": "yarn@3.2.2"
 }
